@@ -13,7 +13,7 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
         user=user,
         password=password
     )
-    print(f"Kết nối thành công đến SAP HANA cho sheet: {sheet_name}!")
+    print(f"SAP HANA CONNECTED FOR SHEET NAME: {sheet_name}!")
     
     # Reset timeout to default
     socket.setdefaulttimeout(None)
@@ -56,7 +56,7 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
         body=body
     ).execute()
     
-    print(f"Đã cập nhật dữ liệu vào Google Sheets cho sheet: {sheet_name} thành công!")
+    print(f"Successfully updated data to Google Sheets for sheet: {sheet_name}!")
     # Đóng kết nối
     cursor.close()
     conn.close() 

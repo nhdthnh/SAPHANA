@@ -8,6 +8,7 @@ from PIL import Image
 import pystray
 from pystray import MenuItem, Icon
 import sys
+import GET_CUSTOMER_CODE
 
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
@@ -69,10 +70,12 @@ def schedule_task(interval):
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
 
 def start_scheduled_task():
-    interval = 10
-    # interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
+    interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
     threading.Thread(target=schedule_task, args=(interval,), daemon=True).start()
-    # minimize_to_tray()  # Thay đổi từ iconify sang minimize_to_tray
+    minimize_to_tray()  # Thay đổi từ iconify sang minimize_to_tray
+
+def Modify_customer_code():
+    GET_CUSTOMER_CODE.Modify_Customer_code()
 
 # Tạo cửa sổ chính
 root = tk.Tk()
@@ -84,7 +87,7 @@ run_button.pack(pady=10)
 
 # Chọn thời gian tự động
 schedule_var = tk.StringVar(value='15')  # Mặc định là 15 phút
-schedule_label = tk.Label(root, text="Chọn thời gian tự động (phút):")
+schedule_label = tk.Label(root, text="Select automatic time (minutes):")
 schedule_label.pack(pady=5)
 
 schedule_options = [15, 60, 180]  # 15 phút, 1 giờ, 3 giờ
@@ -92,8 +95,11 @@ schedule_menu = tk.OptionMenu(root, schedule_var, *schedule_options)
 schedule_menu.pack(pady=5)
 
 # Nút thiết lập
-schedule_button = tk.Button(root, text="THIẾT ĐẶT", command=start_scheduled_task)
+schedule_button = tk.Button(root, text="SCHEDULE", command=start_scheduled_task)
 schedule_button.pack(pady=10)
+
+Customer_button = tk.Button(root, text="MODIFY CUSTOMER CODE", command=Modify_customer_code)
+Customer_button.pack(pady=10)
 
 # Tạo một textbox lớn để hiển thị console output
 console_output = tk.Text(root, height=10, width=50)
