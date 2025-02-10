@@ -1,0 +1,46 @@
+SELECT DISTINCT
+    T2."CardCode" AS "Customer Code", 
+    T2."CardName" AS "Customer Name", 
+    T0."ItemCode" AS "Item Code", 
+    T1."ItemName" AS "Item Name", 
+    T1."SalUnitMsr" AS "Sale UoM", 
+    T0."Quantity" AS "Quantity Sold", 
+    T0."LineTotal" AS "Total Amount without VAT", 
+    ROUND(T0."LineTotal" * (1 + (T0."VatPrcnt" / 100)), 2) AS "Total Amount with VAT", 
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND(T0."LineTotal" / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Discounted Price per Pack", 
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND((T0."LineTotal" * (1 + (T0."VatPrcnt" / 100))) / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Price per Pack with VAT", 
+    T3."DocNum" AS "Invoice Number", 
+
+    -- Chuyển đổi ngày tháng để tránh lỗi
+    TO_VARCHAR(T3."DocDate", 'DD/MM/YYYY') AS "Invoice Date", 
+
+    T4."Name" AS "Contact Person" 
+FROM
+    PRD.INV1 T0 
+LEFT JOIN
+    PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode" 
+LEFT JOIN
+    PRD.OINV T3 ON T0."DocEntry" = T3."DocEntry" 
+LEFT JOIN
+    PRD.OCRD T2 ON T3."CardCode" = T2."CardCode" 
+LEFT JOIN
+    PRD.OCPR T4 ON T2."CardCode" = T4."CardCode" 
+WHERE
+    T0."ItemCode" IN (
+        '32D90000', '32D90002', '32D90003', '32D91223', '32D91224',
+        '32D91231', '32D91232', '32D91233', '32D91234', '32D93327',
+        '32D93328', '32D93329', '32D93333', '32D93334', '32D93335',
+        '32D93338', '32D93339', '32D93340', '32D95319', '32D95322',
+        '32D95323', '32D96327', '32D96329', '32D96330', '32D97318',
+        '32D97320', '32D97321', '32D98323', '32D98326', '32D98327',
+        '32D9O324', '32D9O326', '32D9O327', '32T83217', '32T83219',
+        '32T83220', '32T83221'
+    )
+ORDER BY
+    T2."CardCode", T3."DocNum", "Invoice Date", T0."ItemCode";
