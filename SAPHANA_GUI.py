@@ -9,6 +9,7 @@ import pystray
 from pystray import MenuItem, Icon
 import sys
 import GET_CUSTOMER_CODE
+import GET_PRODUCT_CODE
 
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
@@ -77,6 +78,11 @@ def start_scheduled_task():
 def Modify_customer_code():
     GET_CUSTOMER_CODE.Modify_Customer_code()
 
+def Modify_Product_code():
+    GET_PRODUCT_CODE.Modify_Product_code()
+
+
+
 # Tạo cửa sổ chính
 root = tk.Tk()
 root.title("SAP HANA Task Scheduler")
@@ -90,20 +96,40 @@ schedule_var = tk.StringVar(value='15')  # Mặc định là 15 phút
 schedule_label = tk.Label(root, text="Select automatic time (minutes):")
 schedule_label.pack(pady=5)
 
+schedule_frame = tk.Frame(root)
+schedule_frame.pack(pady=10)
+
 schedule_options = [15, 60, 180]  # 15 phút, 1 giờ, 3 giờ
-schedule_menu = tk.OptionMenu(root, schedule_var, *schedule_options)
-schedule_menu.pack(pady=5)
+schedule_menu = tk.OptionMenu(schedule_frame, schedule_var, *schedule_options)
+schedule_menu.pack(side=tk.LEFT, pady=5)
 
 # Nút thiết lập
-schedule_button = tk.Button(root, text="SCHEDULE", command=start_scheduled_task)
-schedule_button.pack(pady=10)
+schedule_button = tk.Button(schedule_frame, text="SCHEDULE", command=start_scheduled_task)
+schedule_button.pack(side=tk.LEFT,pady=10)
 
-Customer_button = tk.Button(root, text="MODIFY CUSTOMER CODE", command=Modify_customer_code)
-Customer_button.pack(pady=10)
+# Create a frame to hold the buttons
+button_frame = tk.Frame(root)
+button_frame.pack(pady=10)
+
+Customer_button = tk.Button(button_frame, text="MODIFY CUSTOMER CODE", command=Modify_customer_code)
+Customer_button.pack(side=tk.LEFT, padx=5)  # Use pack with side to align horizontally
+
+Product_button = tk.Button(button_frame, text="MODIFY PRODUCT CODE", command=Modify_Product_code)
+Product_button.pack(side=tk.LEFT, padx=5)  # Use pack with side to align horizontally
+
+
+txt_frame = tk.Frame(root)
+txt_frame.pack(pady=10)
+sheet_output = tk.Text(txt_frame, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
+sheet_output.pack(side=tk.LEFT, padx=(0, 10))  # Thêm khoảng cách bên phải
+
+sql_output = tk.Text(txt_frame, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
+sql_output.pack(side=tk.LEFT)  # Đặt sql_output bên cạnh sheet_output
 
 # Tạo một textbox lớn để hiển thị console output
-console_output = tk.Text(root, height=10, width=50)
+console_output = tk.Text(root, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
 console_output.pack(pady=10)
+
 
 # Chuyển hướng stdout đến textbox
 sys.stdout = RedirectText(console_output)

@@ -18,12 +18,10 @@ def get_column_a_values(sheet_name):
     if not values or len(values) < 2:
         return None  # No data in column A
     return [row[0] for row in values[1:] if row]  # Skip header and empty rows
-
-# Retrieve customer codes from Google Sheets
-sheet_name = "MT-DSKH"
-customer_codes = get_column_a_values(sheet_name)
-
 def Modify_Customer_code():
+    # Retrieve customer codes from Google Sheets
+    sheet_name = "MT-DSKH"
+    customer_codes = get_column_a_values(sheet_name)
     if customer_codes:
         card_code_values = ", ".join([f"'{value}'" for value in customer_codes])
 

@@ -1,3 +1,10 @@
+WITH ContactRanked AS (
+    SELECT 
+        T4."CardCode", 
+        T4."Name" AS "Contact Person",
+        ROW_NUMBER() OVER (PARTITION BY T4."CardCode" ORDER BY T4."CntctCode") AS "RowNum"
+    FROM PRD.OCPR T4
+)
 SELECT DISTINCT
     T2."CardCode" AS "Customer Code", -- Mã khách hàng
     T2."CardName" AS "Customer Name", -- Tên khách hàng
@@ -27,8 +34,10 @@ SELECT DISTINCT
     -- Chuyển đổi ngày tháng để tránh lỗi định dạng trong Excel
     TO_VARCHAR(T3."DocDate", 'DD/MM/YYYY') AS "Invoice Date", -- Ngày hóa đơn
 
-    T4."Name" AS "Contact Person", -- Người liên hệ
+    CR."Contact Person", -- Người liên hệ duy nhất liên quan đến Invoice
+
     T5."SlpName" AS "Sales Employee Name" -- Nhân viên bán hàng
+
 FROM
     PRD.INV1 T0 -- Dòng của hóa đơn
 LEFT JOIN
@@ -38,20 +47,9 @@ LEFT JOIN
 LEFT JOIN
     PRD.OCRD T2 ON T3."CardCode" = T2."CardCode" -- Thông tin khách hàng
 LEFT JOIN
-    PRD.OCPR T4 ON T2."CardCode" = T4."CardCode" -- Thông tin người liên hệ
+    ContactRanked CR ON T2."CardCode" = CR."CardCode" AND CR."RowNum" = 1 -- Lấy Contact Person đầu tiên
 LEFT JOIN
     PRD.OSLP T5 ON T3."SlpCode" = T5."SlpCode" -- Thông tin nhân viên bán hàng
-WHERE
-    T0."ItemCode" IN (
-        '32D90000', '32D90002', '32D90003', '32D91223', '32D91224',
-        '32D91231', '32D91232', '32D91233', '32D91234', '32D93327',
-        '32D93328', '32D93329', '32D93333', '32D93334', '32D93335',
-        '32D93338', '32D93339', '32D93340', '32D95319', '32D95322',
-        '32D95323', '32D96327', '32D96329', '32D96330', '32D97318',
-        '32D97320', '32D97321', '32D98323', '32D98326', '32D98327',
-        '32D9O324', '32D9O326', '32D9O327', '32T83217', '32T83219',
-        '32T83220', '32T83221'
-    )
-    AND T3."SlpCode" IN (7, 8) -- Chỉ lọc những đơn hàng của nhân viên có mã 7 và 8
+WHERE T0."ItemCode" IN ('32D90002', '32D91231', '32D91232', '32D93333', '32D93334', '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', '32D97321', '32D98327', '32D9O327', '32T83221')
 ORDER BY
     T2."CardCode", T3."DocNum", "Invoice Date", T0."ItemCode";
