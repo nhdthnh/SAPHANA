@@ -8,6 +8,7 @@ from sap_hana_connection import connect_and_process_data  # Import the new modul
 
 
 def main_function():
+    print("🔄 Running task...")  # In ra console để kiểm tra
     # Đọc thông tin kết nối từ file
     with open('Configure/connection_info.txt', 'r') as file:
         for line in file:
@@ -62,25 +63,23 @@ def main_function():
                 body=body
             ).execute()
         except Exception as e:
-            print(f"Không thể ghi log: {str(e)}")
+            print(f"Can not log: {str(e)}")
 
     # Đọc tên sheet từ file
     with open('Configure/sheet_name.txt', 'r') as file:
         sheet_names = []  # Khởi tạo danh sách rỗng
         for line in file:  # Sử dụng vòng lặp for để đọc từng dòng
             sheet_name = line.strip()  # Lấy tên sheet từ dòng hiện tại
-            print(f"Đang xử lý sheet: {sheet_name}")
+            print(f"Progessing sheet: {sheet_name}")
             # Kết nối đến SAP HANA
             try:
                 query_file = f"SQL QUERY/{sheet_name}.txt"  # Tạo tên file query tương ứng với sheet_name và thêm đường dẫn folder
                 connect_and_process_data(host, port, user, password, sheet_name, service, spreadsheet_id, query_file)  # Pass the specific query file
 
             except Exception as e:
-                error_message = f"Lỗi kết nối SAP HANA: {str(e)}"
+                error_message = f"Connect SAP HANA unsuccessfully: {str(e)}"
                 print(error_message)
                 # Ghi log lỗi vào sheet LOG
                 log_error(service, spreadsheet_id, error_message)
                 break
-    log_error(service, spreadsheet_id, "Cập nhật dữ liệu vào Google Sheets thành công cho sheet")
-
-main_function()
+    log_error(service, spreadsheet_id, "Update google sheet successfully")

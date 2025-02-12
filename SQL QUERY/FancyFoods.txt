@@ -36,7 +36,13 @@ SELECT DISTINCT
 
     CR."Contact Person", -- Người liên hệ duy nhất liên quan đến Invoice
 
-    T5."SlpName" AS "Sales Employee Name" -- Nhân viên bán hàng
+    T5."SlpName" AS "Sales Employee Name", -- Nhân viên bán hàng
+
+    -- 🆕 Thêm cột Quý
+    QUARTER(T3."DocDate") AS "Quarter", -- Xác định quý (1-4)
+
+    -- 🆕 Thêm cột Năm-Tháng để dễ sort
+    TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year-Month" -- Hiển thị năm-tháng
 
 FROM
     PRD.INV1 T0 -- Dòng của hóa đơn
@@ -51,4 +57,8 @@ LEFT JOIN
 LEFT JOIN
     PRD.OSLP T5 ON T3."SlpCode" = T5."SlpCode" -- Thông tin nhân viên bán hàng
 ORDER BY
-    T2."CardCode", T3."DocNum", "Invoice Date", T0."ItemCode";
+    T2."CardCode", 
+    T3."DocNum", 
+    "Year-Month" DESC, -- Sắp xếp theo năm-tháng trước
+    "Quarter" DESC, -- Sau đó sắp xếp theo quý
+    T0."ItemCode";

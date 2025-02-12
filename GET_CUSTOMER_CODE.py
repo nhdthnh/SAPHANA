@@ -3,7 +3,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 # Read Spreadsheet ID
-with open('spreadsheet_id.txt', 'r') as file:
+with open('Configure/spreadsheet_id.txt', 'r') as file:
     spreadsheet_id = file.read().strip()
 
 # Initialize Google Sheets API
@@ -26,7 +26,7 @@ def Modify_Customer_code():
         card_code_values = ", ".join([f"'{value}'" for value in customer_codes])
 
         # Read MT.txt content
-        file_path = 'MT.txt'
+        file_path = 'SQL QUERY/MT.txt'
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 mt_content = file.read()
