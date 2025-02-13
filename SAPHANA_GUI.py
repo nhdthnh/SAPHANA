@@ -9,6 +9,7 @@ import GET_PRODUCT_CODE
 import ADVANCE  # Thêm import cho file ADVANCE.py
 import ConnectionGUI
 import ID
+import CopyMT
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
 
@@ -30,33 +31,46 @@ def run_task():
     try:
         # Gọi hàm từ SAPHANA.py để thực hiện công việc
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
+        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
+            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
+            for value in values:  # Lặp qua từng giá trị
+                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
         root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
     except Exception as e:
         root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
 
 def run_task_maunal():
-    SAPHANA.main_function()
-    # Thêm thông báo hoàn tất
-    messagebox.showinfo("Notification", "Done!!! 😺")
+    run_button.config(bg='green')  # Change button color to green when task starts
+    try:
+        SAPHANA.main_function()
+        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
+            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
+            for value in values:  # Lặp qua từng giá trị
+                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
+        # Thêm thông báo hoàn tất
+        messagebox.showinfo("Notification", "Done!!! 😺")
+    finally:
+        run_button.config(bg='red')  # Revert button color back to red after task completion
 
-def on_quit(icon, item):
+def on_quit():
     global running  # Sử dụng biến toàn cục
     running = False  # Dừng việc lặp lại
-    icon.stop()
-    root.quit()
+    root.destroy()
 
 def on_icon_double_click(icon, item):
     root.deiconify()  # Hiển thị lại cửa sổ chính
     root.lift()  # Đưa cửa sổ lên trên cùng
     root.focus_force()  # Đảm bảo cửa sổ nhận được tiêu điểm
 
-
 def schedule_task(interval):
-
     global running  # Sử dụng biến toàn cục
     while running:  # Kiểm tra biến running
         time.sleep(interval)  # Chờ 20 giây
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
+        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
+            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
+            for value in values:  # Lặp qua từng giá trị
+                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
         print("Restarting task...")
 
 def start_scheduled_task():
@@ -149,7 +163,7 @@ top_frame = tk.Frame(root)
 top_frame.pack(pady=10)
 
 # Nút chạy thủ công
-run_button = tk.Button(top_frame, text="RUN", command=run_task_maunal)
+run_button = tk.Button(top_frame, text="RUN", command=run_task_maunal, bg='red', fg = 'white')  # Set initial color to red
 run_button.pack(side=tk.LEFT, padx=(0, 5))  # Align to the left
 
 # Chọn thời gian tự động
@@ -162,21 +176,21 @@ schedule_menu = tk.OptionMenu(top_frame, schedule_var, *schedule_options)
 schedule_menu.pack(side=tk.LEFT, padx=(0, 5))
 
 # Nút thiết lập
-schedule_button = tk.Button(top_frame, text="SCHEDULE", command=start_scheduled_task)
+schedule_button = tk.Button(top_frame, text="SCHEDULE", command=start_scheduled_task, bg='blue', fg='white')
 schedule_button.pack(side=tk.LEFT, padx=(5, 10))
+ 
+both_sheet = tk.Frame(root)
+both_sheet.pack(pady=10)
 
-# # Create a frame to hold the buttons
-# button_frame = tk.Frame(root)
-# button_frame.pack(pady=10)
+text_label = tk.Label(both_sheet,text="Copy Sheet")
+text_label.pack(side=tk.LEFT)
+text_var = tk.StringVar(value="MT")  # Biến cho Text
+text_entry = tk.Entry(both_sheet, textvariable=text_var, width=30)  # Tạo Entry với giá trị mặc định
+text_entry.pack(side=tk.LEFT, padx=(10, 5))  # Đặt Entry bên trái
 
-# Customer_button = tk.Button(button_frame, text="MODIFY CUSTOMER CODE", command=Modify_customer_code)
-# Customer_button.pack(side=tk.LEFT, padx=5)  # Use pack with side to align horizontally
-
-# Product_button = tk.Button(button_frame, text="MODIFY PRODUCT CODE", command=Modify_Product_code)
-# Product_button.pack(side=tk.LEFT, padx=5)  # Use pack with side to align horizontally
-
-# More_button = tk.Button(button_frame, text="...", command= open_text_input_app)
-# More_button.pack(side=tk.LEFT, padx=5)  # Use pack with side to align horizontally
+checkbox_var = tk.BooleanVar(value=True)  # Biến cho Checkbox
+checkbox = tk.Checkbutton(both_sheet, text="Run both sheet", variable=checkbox_var)  # Tạo Checkbox
+checkbox.pack(side=tk.LEFT)  # Đặt Checkbox bên cạnh Entry
 
 Modify_label = tk.Label(root, text="Modify sheet to run")
 Modify_label.pack(padx=0)
@@ -207,8 +221,16 @@ txt_frame.pack(pady=10)
 sheet_output = tk.Listbox(txt_frame, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
 sheet_output.pack(side=tk.LEFT, padx=(0, 10))  # Thêm khoảng cách bên phải
 
-console_label = tk.Label(root, text="Console output")
-console_label.pack(padx=0)
+console_frame = tk.Frame(root)  # Tạo một frame mới để chứa label và button
+console_frame.pack(pady=10)  # Đặt frame với khoảng cách trên và dưới
+
+console_label = tk.Label(console_frame, text="Console output")  # Chuyển console_label vào frame
+console_label.pack(side=tk.LEFT, padx=(0, 5))  # Đặt label bên trái với khoảng cách bên phải
+
+# Thêm nút để xóa console
+clear_button = tk.Button(console_frame, text="Clear", command=lambda: console_output.delete(1.0, tk.END))  # Nút để xóa nội dung console
+clear_button.pack(side=tk.LEFT)  # Đặt nút bên cạnh label
+
 # Tạo một Text widget lớn để hiển thị console output
 console_output = tk.Text(root, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
 console_output.pack(pady=10, fill=tk.X, expand=True)  # Cập nhật để chiếm 100% chiều rộng
@@ -220,6 +242,8 @@ sys.stdout = RedirectText(console_output)
 # Gọi hàm để tải dữ liệu vào Listbox khi khởi động
 load_listboxes_from_file()
 
+# Thêm sự kiện để dừng tất cả các thread khi cửa sổ chính đóng
+root.protocol("WM_DELETE_WINDOW", on_quit)  # Gọi hàm on_quit khi cửa sổ chính bị đóng
 
 # Chạy GUI
 root.mainloop()

@@ -4,7 +4,8 @@ from googleapiclient.discovery import build
 
 # Read Spreadsheet ID
 with open('Configure/spreadsheet_id.txt', 'r') as file:
-    spreadsheet_id = file.read().strip()
+    lines = file.readlines()
+    spreadsheet_id = lines[0].strip()  # Hàng 1 cho ID1
 
 # Initialize Google Sheets API
 creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')

@@ -1,28 +1,43 @@
 @echo off
 cls
-echo 🔄 Đang kích hoạt môi trường Conda...
+echo Activating Conda environment...
 
-REM Kích hoạt môi trường Conda (dành cho Windows)
+REM Activate Conda environment (for Windows)
 call conda activate env_py37
 
-echo ✅ Môi trường Conda đã được kích hoạt!
-echo 🔄 Đang đóng gói file .exe với PyInstaller...
+echo Conda environment has been activated!
+echo Packaging .exe file with PyInstaller...
 
-REM Chạy PyInstaller để build file .exe
+REM Run PyInstaller to build .exe file
 pyinstaller --onefile --windowed --icon=icon.ico --name "SAPHANA TOOL" SAPHANA_GUI.py
 
-echo ✅ Build thành công!
-echo 🔄 Đang di chuyển file .exe về thư mục gốc...
+echo Build successful!
+echo Moving .exe file to the root directory...
 
-REM Di chuyển file .exe ra thư mục gốc
+REM Move .exe file to the root directory
 move /Y dist\"SAPHANA TOOL.exe" .
 
-echo 🔄 Đang xoá các thư mục tạm...
+echo Deleting temporary folders...
 
-REM Xoá thư mục dist, build, và file .spec
+REM Delete dist, build folders, and .spec file
 rmdir /S /Q dist
 rmdir /S /Q build
 del /F /Q "SAPHANA TOOL.spec"
 
-echo ✅ Quá trình hoàn tất! File "SAPHANA TOOL.exe" đã được tạo và di chuyển về thư mục gốc.
+REM Create folder "SAPHANA SUPPORT TOOL"
+mkdir "SAPHANA SUPPORT TOOL"
+
+REM Copy necessary files and folders into the new folder
+copy "SAPHANA TOOL.exe" "SAPHANA SUPPORT TOOL\"
+copy "icon.ico" "SAPHANA SUPPORT TOOL\"
+xcopy "SQL QUERY" "SAPHANA SUPPORT TOOL\SQL QUERY" /E /I
+xcopy "Configure" "SAPHANA SUPPORT TOOL\Configure" /E /I
+
+REM Compress the folder into a rar file (ensure WinRAR is installed and in PATH)
+"C:\Program Files\WinRAR\Rar.exe" a -r "SAPHANA_SUPPORT_TOOL.rar" "SAPHANA SUPPORT TOOL\*"
+
+REM Delete the folder "SAPHANA SUPPORT TOOL"
+rmdir /S /Q "SAPHANA SUPPORT TOOL"
+
+echo Process completed! File "SAPHANA TOOL.exe" has been created and moved to the root directory.
 exit

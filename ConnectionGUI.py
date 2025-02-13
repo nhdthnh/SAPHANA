@@ -19,7 +19,7 @@ def edit_connection():
 
     def show_main_window():
         # Ẩn cửa sổ nhập mật khẩu
-        password_window.withdraw()
+        password_window.destroy()
         
         # Tạo cửa sổ chính
         main_window = tk.Tk()
@@ -69,17 +69,14 @@ def edit_connection():
         # Tạo nút Save
         save_button = tk.Button(main_window, text="Save", command=save_info)
         save_button.grid(row=4, columnspan=2)
-
         main_window.mainloop()
 
     def check_password():
         entered_password = password_entry.get()
         if entered_password == CORRECT_PASSWORD:
-            password_window.withdraw()  # Ẩn cửa sổ nhập mật khẩu
             show_main_window()  # Mở cửa sổ chính
         else:
             messagebox.showerror("Error", "Incorrect password!")
-
     # Thêm sự kiện nhấn phím Enter
 
 
