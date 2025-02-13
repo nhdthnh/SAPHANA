@@ -1,0 +1,64 @@
+WITH ContactRanked AS (
+    SELECT 
+        T4."CardCode", 
+        T4."Name" AS "Contact Person",
+        ROW_NUMBER() OVER (PARTITION BY T4."CardCode" ORDER BY T4."CntctCode") AS "RowNum"
+    FROM PRD.OCPR T4
+)
+SELECT DISTINCT
+    T2."CardCode" AS "Customer Code", -- Mã khách hàng
+    T2."CardName" AS "Customer Name", -- Tên khách hàng
+    T0."ItemCode" AS "Item Code", -- Mã sản phẩm
+    T1."ItemName" AS "Item Name", -- Tên sản phẩm
+    T1."SalUnitMsr" AS "Sale UoM", -- Đơn vị bán
+    T0."Quantity" AS "Quantity Sold", -- Số lượng sản phẩm đã bán
+    T0."LineTotal" AS "Total Amount without VAT", -- Giá tổng trước thuế (đã discount)
+
+    -- Tính giá tổng sau thuế
+    ROUND(T0."LineTotal" * (1 + (T0."VatPrcnt" / 100)), 2) AS "Total Amount with VAT", -- Giá tổng sau thuế
+
+    -- Tính giá discount từng bịch
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND(T0."LineTotal" / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Discounted Price per Pack", -- Giá từng bịch không thuế
+
+    -- Tính giá từng bịch sau thuế
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND((T0."LineTotal" * (1 + (T0."VatPrcnt" / 100))) / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Price per Pack with VAT", -- Giá từng bịch có thuế
+
+    T3."DocNum" AS "Invoice Number", -- Số hóa đơn
+
+    -- Chuyển đổi ngày tháng để tránh lỗi định dạng trong Excel
+    TO_VARCHAR(T3."DocDate", 'DD/MM/YYYY') AS "Invoice Date", -- Ngày hóa đơn
+
+    CR."Contact Person", -- Người liên hệ duy nhất liên quan đến Invoice
+
+    T5."SlpName" AS "Sales Employee Name", -- Nhân viên bán hàng
+
+    -- 🆕 Thêm cột Quý
+    QUARTER(T3."DocDate") AS "Quarter", -- Xác định quý (1-4)
+
+    -- 🆕 Thêm cột Năm-Tháng để dễ sort
+    TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year-Month" -- Hiển thị năm-tháng
+
+FROM
+    PRD.INV1 T0 -- Dòng của hóa đơn
+LEFT JOIN
+    PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode" -- Thông tin sản phẩm
+LEFT JOIN
+    PRD.OINV T3 ON T0."DocEntry" = T3."DocEntry" -- Hóa đơn chính
+LEFT JOIN
+    PRD.OCRD T2 ON T3."CardCode" = T2."CardCode" -- Thông tin khách hàng
+LEFT JOIN
+    ContactRanked CR ON T2."CardCode" = CR."CardCode" AND CR."RowNum" = 1 -- Lấy Contact Person đầu tiên
+LEFT JOIN
+    PRD.OSLP T5 ON T3."SlpCode" = T5."SlpCode" -- Thông tin nhân viên bán hàng
+ORDER BY
+    T2."CardCode", 
+    T3."DocNum", 
+    "Year-Month" DESC, -- Sắp xếp theo năm-tháng trước
+    "Quarter" DESC, -- Sau đó sắp xếp theo quý
+    T0."ItemCode";
