@@ -7,7 +7,7 @@ with open('Configure/spreadsheet_id.txt', 'r') as file:
     spreadsheet_id = file.read().strip()
 
 # Initialize Google Sheets API
-creds = service_account.Credentials.from_service_account_file('credentials.json')
+creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
 service = build('sheets', 'v4', credentials=creds)
 
 # Function to get column A values

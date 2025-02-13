@@ -123,20 +123,17 @@ def editID():
 root = tk.Tk()
 root.title("SAP HANA Task Scheduler")
 # root.geometry("800x600")  # Đặt kích thước cố định cho cửa sổ GUI
-root.resizable(False, False)  # Không cho phép thay đổi kích thước cửa sổ
 
+root.resizable(False, False)  # Không cho phép thay đổi kích thước cửa sổ
+root.iconbitmap("icon.ico")
 # Tạo thanh menu
 menu_bar = tk.Menu(root)
+Configure = tk.Menu(menu_bar, tearoff=0)
+Configure.add_command(label="Connection", command=editConnection)
+Configure.add_command(label="Spreadsheet ID", command=editID)
+menu_bar.add_cascade(label="Configure", menu=Configure)
 
-# Tạo menu Connection
-connection_menu = tk.Menu(menu_bar, tearoff=0)
-connection_menu.add_command(label="Edit", command=editConnection)
-menu_bar.add_cascade(label="Connection", menu=connection_menu)
 
-# Tạo menu ID
-id_menu = tk.Menu(menu_bar, tearoff=0)
-id_menu.add_command(label="Edit", command=editID)
-menu_bar.add_cascade(label="Spreadsheet ID", menu=id_menu)
 
 code_menu = tk.Menu(menu_bar, tearoff=0)
 code_menu.add_command(label="Customer", command=Modify_customer_code)

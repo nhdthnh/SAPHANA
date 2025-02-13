@@ -29,7 +29,7 @@ def main_function():
 
 
     # Khởi tạo Google Sheets service
-    creds = service_account.Credentials.from_service_account_file('credentials.json')
+    creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
     service = build('sheets', 'v4', credentials=creds)
 
     def log_error(service, spreadsheet_id, error_message):

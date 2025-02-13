@@ -5,16 +5,15 @@ from googleapiclient.discovery import build
 from tkinter import filedialog  # Nhập thư viện cho hộp thoại chọn tệp
 
 # Read Spreadsheet ID from file
-with open('Configure/spreadsheet_id.txt', 'r') as file:
-    spreadsheet_id = file.read().strip()
+
 
 # Initialize Google Sheets API
-creds = service_account.Credentials.from_service_account_file('credentials.json')
+creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
 service = build('sheets', 'v4', credentials=creds)
 
 
-def get_column_a_values(sheet_name, header):
-    result = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=sheet_name).execute()
+def get_column_a_values(sheet_name, header, spreadsheet_id_value):
+    result = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id_value, range=sheet_name).execute()
     values = result.get('values', [])
     if not values or len(values) < 2:
         return None  # No data
@@ -33,7 +32,8 @@ class TextInputApp:
             try:
                 sheet_name = self.text1.get("1.0", tk.END).strip()  # Get sheet name from text1
                 column_name = self.text2.get("1.0", tk.END).strip()
-                item_codes = get_column_a_values(sheet_name, column_name)
+                id_sheet =  self.text_id.get("1.0",tk.END).strip()
+                item_codes = get_column_a_values(sheet_name, column_name, id_sheet)
                 print(item_codes)
                 item_code_values = ", ".join([f"'{value}'" for value in item_codes]) if item_codes else ""
                 if item_codes:
@@ -72,6 +72,13 @@ class TextInputApp:
         # Tạo một khung để chứa text1 và text2
         sheet = tk.Frame(master)
         sheet.pack(side=tk.TOP)
+        self.label_id = tk.Label(sheet, text="Spreadsheet ID: ")
+        self.label_id.pack(side=tk.LEFT)
+        self.text_id = tk.Text(sheet, height=1, width=50)
+        self.text_id.pack(side=tk.LEFT)  # Đặt text1 bên trái
+        with open('Configure/spreadsheet_id.txt', 'r') as file:
+            spreadsheet_id = file.read().strip()
+            self.text_id.insert(tk.END, spreadsheet_id)  # Chèn nội dung vào text4
         self.label1 = tk.Label(sheet, text="Sheet name: ")
         self.label1.pack(side=tk.LEFT)
         self.text1 = tk.Text(sheet, height=1, width=20)
@@ -103,7 +110,7 @@ class TextInputApp:
         self.text4 = tk.Text(modify, height=50, width=100)
         self.text4.grid(row=1, column=1)  # Đặt text4 ở hàng 1, cột 1
 
-# if __name__ == "__main__":
-#     root = tk.Tk()
-#     app = TextInputApp(root)
-#     root.mainloop()  # Khởi động vòng lặp chính của Tkinter
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TextInputApp(root)
+    root.mainloop()  # Khởi động vòng lặp chính của Tkinter

@@ -25,4 +25,4 @@ rmdir /S /Q build
 del /F /Q "SAPHANA TOOL.spec"
 
 echo ✅ Quá trình hoàn tất! File "SAPHANA TOOL.exe" đã được tạo và di chuyển về thư mục gốc.
-pause
+exit
