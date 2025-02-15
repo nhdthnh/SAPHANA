@@ -1,0 +1,45 @@
+SELECT
+    T1."ItemCode" AS "Item Code", -- Mã sản phẩm
+    T1."CodeBars" AS "Barcode", -- Barcode
+    T1."ItemName" AS "Item Name", -- Tên sản phẩm
+    T1."SalUnitMsr" AS "Sale UoM", -- Quy cách đóng gói
+    T3."WhsName" AS "Warehouse Name", -- Tên kho
+    TO_VARCHAR(T4."MnfDate", 'DD/MM/YYYY') AS "Manufacture Date", -- Ngày sản xuất (dd/mm/yyyy)
+    TO_VARCHAR(T4."ExpDate", 'DD/MM/YYYY') AS "Expiration Date", -- Ngày hết hạn (dd/mm/yyyy)
+    -- Tính toán số lượng theo bịch
+    CASE
+        WHEN T1."SalUnitMsr" = 'Túi 75g' THEN ROUND(T5."Quantity" / 0.075, 2)
+        WHEN T1."SalUnitMsr" = 'Túi 150g' THEN ROUND(T5."Quantity" / 0.15, 2)
+        WHEN T1."ItemName" LIKE '%150g%' THEN ROUND(T5."Quantity" / 0.15, 2)
+        WHEN T1."ItemName" LIKE '%75g%' THEN ROUND(T5."Quantity" / 0.075, 2)
+        ELSE T5."Quantity" -- Nếu không xác định được, giữ nguyên số lượng
+    END AS "Quantity On Hand (Packs)", -- Số lượng tính theo bịch
+    DAYS_BETWEEN(T4."MnfDate", T4."ExpDate") AS "Shelf Life Cycle", -- Chu kỳ sử dụng (số ngày giữa sản xuất và hết hạn)
+    -- Tính phần trăm hạn sử dụng còn lại
+    CASE
+        WHEN DAYS_BETWEEN(T4."MnfDate", T4."ExpDate") > 0 THEN 
+            ROUND(
+                (DAYS_BETWEEN(CURRENT_DATE, T4."ExpDate") * 100.0) / 
+                NULLIF(DAYS_BETWEEN(T4."MnfDate", T4."ExpDate"), 0), 2
+            )
+        ELSE 0
+    END AS "Remaining Shelf Life (%)", -- % hạn sử dụng còn lại
+    DAYS_BETWEEN(CURRENT_DATE, T4."ExpDate") AS "Countdown", -- Số ngày còn lại (hết hạn - hiện tại)
+    '' AS "Brand", -- Cột Brand, để trống
+    T5."Quantity" AS "Quantity (Kg)", -- Số lượng gốc (Kg)
+    T4."DistNumber" AS "Batch Number" -- Số lô
+FROM
+    PRD.OITM T1 -- Bảng thông tin mặt hàng
+INNER JOIN
+    PRD.OBTN T4 ON T1."ItemCode" = T4."ItemCode" -- Bảng thông tin số lô
+INNER JOIN
+    PRD.OBTQ T5 ON T4."AbsEntry" = T5."MdAbsEntry" -- Bảng thông tin tồn kho theo lô
+LEFT JOIN
+    PRD.OWHS T3 ON T5."WhsCode" = T3."WhsCode" -- Bảng thông tin kho
+WHERE
+    T4."ExpDate" IS NOT NULL -- Chỉ hiển thị các sản phẩm có ngày hết hạn
+    AND T5."Quantity" > 0 -- Chỉ hiển thị các lô có tồn kho
+    AND T1."ItemCode" IN (
+'32D90002', '32D91231', '32D91232', '32D93333', '32D93334', '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', '32D97321', '32D98327', '32D9O327', '32T83221')
+ORDER BY
+    T1."ItemCode", T3."WhsName", T4."DistNumber";

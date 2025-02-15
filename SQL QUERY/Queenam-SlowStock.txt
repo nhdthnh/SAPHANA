@@ -1,0 +1,34 @@
+SELECT 
+    T1."ItemCode" AS "Item Code", -- Mã sản phẩm
+    T1."ItemName" AS "Item Name", -- Tên sản phẩm
+    T2."WhsCode" AS "Warehouse Code", -- Mã kho
+    T3."WhsName" AS "Warehouse Name", -- Tên kho
+    T2."OnHand" AS "Quantity On Hand (Kg)", -- Số lượng tồn kho (Kg)
+    T1."SalUnitMsr" AS "Sale UoM", -- Quy cách đóng gói
+
+    -- Chuyển đổi số lượng từ kg sang số bịch (packs)
+    CASE
+        WHEN T1."SalUnitMsr" = 'Túi 75g' THEN ROUND(T2."OnHand" / 0.075, 0)
+        WHEN T1."SalUnitMsr" = 'Túi 150g' THEN ROUND(T2."OnHand" / 0.15, 0)
+        WHEN T1."ItemName" LIKE '%150g%' THEN ROUND(T2."OnHand" / 0.15, 0)
+        WHEN T1."ItemName" LIKE '%75g%' THEN ROUND(T2."OnHand" / 0.075, 0)
+        ELSE NULL -- Gắn NULL nếu không xác định được quy cách đóng gói
+    END AS "Number of Packs" -- Tổng số gói
+
+FROM PRD.OITM T1 -- Bảng sản phẩm
+LEFT JOIN PRD.OITW T2 ON T1."ItemCode" = T2."ItemCode" -- Bảng tồn kho theo kho
+LEFT JOIN PRD.OWHS T3 ON T2."WhsCode" = T3."WhsCode" -- Bảng tên kho
+WHERE 
+    T1."ItemCode" IN (
+'32D90002', '32D91231', '32D91232', '32D93333', '32D93334', '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', '32D97321', '32D98327', '32D9O327', '32T83221') 
+    AND (
+        CASE
+            WHEN T1."SalUnitMsr" = 'Túi 75g' THEN ROUND(T2."OnHand" / 0.075, 0)
+            WHEN T1."SalUnitMsr" = 'Túi 150g' THEN ROUND(T2."OnHand" / 0.15, 0)
+            WHEN T1."ItemName" LIKE '%150g%' THEN ROUND(T2."OnHand" / 0.15, 0)
+            WHEN T1."ItemName" LIKE '%75g%' THEN ROUND(T2."OnHand" / 0.075, 0)
+            ELSE NULL
+        END
+    ) BETWEEN 1 AND 49 -- Chỉ lấy số lượng từ 1 đến 49 gói
+ORDER BY 
+    T3."WhsName", T1."ItemCode"; -- Sắp xếp theo kho và mã sản phẩm

@@ -31,10 +31,6 @@ def run_task():
     try:
         # Gọi hàm từ SAPHANA.py để thực hiện công việc
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
-        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
-            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
-            for value in values:  # Lặp qua từng giá trị
-                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
         root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
     except Exception as e:
         root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
@@ -43,10 +39,6 @@ def run_task_maunal():
     run_button.config(bg='green')  # Change button color to green when task starts
     try:
         SAPHANA.main_function()
-        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
-            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
-            for value in values:  # Lặp qua từng giá trị
-                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
         # Thêm thông báo hoàn tất
         messagebox.showinfo("Notification", "Done!!! 😺")
     finally:
@@ -67,10 +59,6 @@ def schedule_task(interval):
     while running:  # Kiểm tra biến running
         time.sleep(interval)  # Chờ 20 giây
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
-        if checkbox_var.get():  # Kiểm tra xem checkbox có được chọn không
-            values = text_var.get().split(",")  # Tách các giá trị bằng dấu phẩy
-            for value in values:  # Lặp qua từng giá trị
-                CopyMT.Copy(value.strip())  # Gọi hàm CopyMT.Copy với giá trị đã được loại bỏ khoảng trắng
         print("Restarting task...")
 
 def start_scheduled_task():
@@ -93,6 +81,13 @@ def load_listboxes_from_file():
                 sheet_output.insert(tk.END, line.strip())  # Thêm dòng vào sheet_output
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while reading the file: {str(e)}")
+    try:
+        with open('Configure/Second_sheet_name.txt', 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                sheet_output1.insert(tk.END, line.strip())  # Thêm dòng vào sheet_output
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred while reading the file: {str(e)}")
 
 # Thêm các nút để tương tác với Listbox
 def add_item():
@@ -101,15 +96,25 @@ def add_item():
     entry.delete(0, tk.END)  # Xóa giá trị trong entry
     save_to_file()
 
+def add_item1():
+    item = entry.get()
+    sheet_output1.insert(tk.END, item)  # Thêm mục vào sheet_output
+    entry.delete(0, tk.END)  # Xóa giá trị trong entry
+    save_to_file()
+
 def delete_item():
     selected_item_index = sheet_output.curselection()
-    if selected_item_index:
+    selected_item_index1 = sheet_output1.curselection()
+    if selected_item_index or selected_item_index1:
         if sheet_output.curselection():
             sheet_output.delete(selected_item_index)
+        if sheet_output1.curselection():
+            sheet_output1.delete(selected_item_index1)
         save_to_file()
 
 def modify_item():
     selected_item_index = sheet_output.curselection()
+    selected_item_index1 = sheet_output1.curselection()
     if selected_item_index:
         item = entry.get()
         if item:
@@ -117,11 +122,21 @@ def modify_item():
             sheet_output.insert(selected_item_index, item)
             entry.delete(0, tk.END)  # Xóa giá trị trong entry
             save_to_file()
+    if selected_item_index1:
+        item = entry.get()
+        if item:
+            sheet_output1.delete(selected_item_index1)
+            sheet_output1.insert(selected_item_index1, item)
+            entry.delete(0, tk.END)
+            save_to_file()
 
 def save_to_file():
     with open('Configure/sheet_name.txt', 'w') as file:
         for item in sheet_output.get(0, tk.END):
-            file.write(f"{item}\n")        
+            file.write(f"{item}\n")
+    with open('Configure/second_sheet_name.txt', 'w') as file:
+        for item in sheet_output1.get(0, tk.END):
+            file.write(f"{item}\n")            
 
 def open_text_input_app():
     new_window = tk.Toplevel(root)  # Tạo cửa sổ mới
@@ -179,18 +194,6 @@ schedule_menu.pack(side=tk.LEFT, padx=(0, 5))
 schedule_button = tk.Button(top_frame, text="SCHEDULE", command=start_scheduled_task, bg='blue', fg='white')
 schedule_button.pack(side=tk.LEFT, padx=(5, 10))
  
-both_sheet = tk.Frame(root)
-both_sheet.pack(pady=10)
-
-text_label = tk.Label(both_sheet,text="Copy Sheet")
-text_label.pack(side=tk.LEFT)
-text_var = tk.StringVar(value="MT")  # Biến cho Text
-text_entry = tk.Entry(both_sheet, textvariable=text_var, width=30)  # Tạo Entry với giá trị mặc định
-text_entry.pack(side=tk.LEFT, padx=(10, 5))  # Đặt Entry bên trái
-
-checkbox_var = tk.BooleanVar(value=True)  # Biến cho Checkbox
-checkbox = tk.Checkbutton(both_sheet, text="Run both sheet", variable=checkbox_var)  # Tạo Checkbox
-checkbox.pack(side=tk.LEFT)  # Đặt Checkbox bên cạnh Entry
 
 Modify_label = tk.Label(root, text="Modify sheet to run")
 Modify_label.pack(padx=0)
@@ -203,8 +206,11 @@ entry = tk.Entry(txt_frame_modify, width=20)
 entry.pack(side=tk.LEFT, padx=(10, 10))
 
 # Nút thêm
-add_button = tk.Button(txt_frame_modify, text="ADD", command=add_item)
+add_button = tk.Button(txt_frame_modify, text="ADD DOANHSO", command=add_item)
 add_button.pack(side=tk.LEFT, padx=(5, 5))
+
+add_button1 = tk.Button(txt_frame_modify, text="ADD DOANHSO-QUEENAM", command=add_item1)
+add_button1.pack(side=tk.LEFT, padx=(5, 5))
 
 # Nút xóa
 delete_button = tk.Button(txt_frame_modify, text="DELETE", command=delete_item)
@@ -214,12 +220,32 @@ delete_button.pack(side=tk.LEFT, padx=(5, 5))
 modify_button = tk.Button(txt_frame_modify, text="MODIFY", command=modify_item)
 modify_button.pack(side=tk.LEFT, padx=(5, 5))
 
+sheet_label_frame = tk.Frame(root)
+sheet_label_frame.pack(pady=10)
+
+
+
+
 txt_frame = tk.Frame(root)
 txt_frame.pack(pady=10)
+frame1 = tk.Frame(txt_frame)
+frame1.pack(side=tk.LEFT, padx=10)
 
-# Thay thế sheet_output bằng Listbox
-sheet_output = tk.Listbox(txt_frame, height=10, width=50, bd=1, highlightbackground="black", highlightcolor="black")
-sheet_output.pack(side=tk.LEFT, padx=(0, 10))  # Thêm khoảng cách bên phải
+label1 = tk.Label(frame1, text="SAP-DOANHSO", font=("Arial", 10, "bold"))
+label1.pack(side=tk.TOP)  # Đặt label ở trên
+
+sheet_output = tk.Listbox(frame1, height=10, width=30, bd=1, highlightbackground="black", highlightcolor="black")
+sheet_output.pack(side=tk.TOP)  # Đặt Listbox dưới label
+
+# Frame cho Listbox 2
+frame2 = tk.Frame(txt_frame)
+frame2.pack(side=tk.LEFT, padx=10)
+
+label2 = tk.Label(frame2, text="SAP-DOANHSO-QUEENAM", font=("Arial", 10, "bold"))
+label2.pack(side=tk.TOP)  # Đặt label ở trên
+
+sheet_output1 = tk.Listbox(frame2, height=10, width=30, bd=1, highlightbackground="black", highlightcolor="black")
+sheet_output1.pack(side=tk.TOP)  # Đặt Listbox dưới label
 
 console_frame = tk.Frame(root)  # Tạo một frame mới để chứa label và button
 console_frame.pack(pady=10)  # Đặt frame với khoảng cách trên và dưới

@@ -56,9 +56,6 @@ def editID():
             messagebox.showerror("Error", "Incorrect password!")
 
 
-    # Thêm sự kiện nhấn phím Enter
-
-
     # Tạo cửa sổ nhập mật khẩu
     password_window = tk.Tk()
     password_window.title("Enter Password")

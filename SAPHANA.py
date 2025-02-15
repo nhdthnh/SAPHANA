@@ -26,6 +26,7 @@ def main_function():
     with open('Configure/spreadsheet_id.txt', 'r') as file:
         lines = file.readlines()
         spreadsheet_id = lines[0].strip()  # Hàng 1 cho ID1
+        spreadsheet_id1= lines[1].strip()
     
     # Khởi tạo Google Sheets service
     creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
@@ -74,11 +75,25 @@ def main_function():
             try:
                 query_file = f"SQL QUERY/{sheet_name}.txt"  # Tạo tên file query tương ứng với sheet_name và thêm đường dẫn folder
                 connect_and_process_data(host, port, user, password, sheet_name, service, spreadsheet_id, query_file)  # Pass the specific query file
-
+                log_error(service, spreadsheet_id, "Update google sheet successfully")
             except Exception as e:
                 error_message = f"Connect SAP HANA unsuccessfully: {str(e)}"
                 print(error_message)
                 # Ghi log lỗi vào sheet LOG
                 log_error(service, spreadsheet_id, error_message)
                 break
-    log_error(service, spreadsheet_id, "Update google sheet successfully")
+    with open('Configure/second_sheet_name.txt', 'r') as file:
+        for line in file:  # Sử dụng vòng lặp for để đọc từng dòng
+            sheet_name1 = line.strip()  # Lấy tên sheet từ dòng hiện tại
+            print(f"Progessing sheet: {sheet_name1}")
+            # Kết nối đến SAP HANA
+            try:
+                query_file = f"SQL QUERY/{sheet_name1}.txt"  # Tạo tên file query tương ứng với sheet_name và thêm đường dẫn folder
+                connect_and_process_data(host, port, user, password, sheet_name1, service, spreadsheet_id1, query_file)  # Pass the specific query file
+                log_error(service, spreadsheet_id1, "Update google sheet successfully")
+            except Exception as e:
+                error_message = f"Connect SAP HANA unsuccessfully: {str(e)}"
+                print(error_message)
+                log_error(service, spreadsheet_id1, error_message)
+                break
+    
