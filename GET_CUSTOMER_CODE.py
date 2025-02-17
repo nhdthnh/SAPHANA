@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 # Read Spreadsheet ID
 with open('Configure/spreadsheet_id.txt', 'r') as file:
     lines = file.readlines()
-    spreadsheet_id = lines[0].strip()  # Hàng 1 cho ID1
+    spreadsheet_id = lines[1].strip()  # Hàng 1 cho ID1
 
 # Initialize Google Sheets API
 creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
@@ -25,7 +25,7 @@ def Modify_Customer_code():
     customer_codes = get_column_a_values(sheet_name)
     if customer_codes:
         card_code_values = ", ".join([f"'{value}'" for value in customer_codes])
-
+        card_code_values = card_code_values.replace(".", "")
         # Read MT.txt content
         file_path = 'SQL QUERY/MT.txt'
         try:
@@ -34,20 +34,17 @@ def Modify_Customer_code():
             print("Original content loaded successfully.")
 
             # Update the WHERE clause
-            pattern = r'WHERE T2\."CardCode" IN \((.*?)\)'
+            pattern = r'WHERE\s+T2\."CardCode"\s+IN\s*\((.*?)\)'
             replacement = f'WHERE T2."CardCode" IN ({card_code_values})'
             new_mt_content = re.sub(pattern, replacement, mt_content, flags=re.DOTALL)
-
-            # Verify the replacement result
-            if new_mt_content == mt_content:
-                print("No changes made. Check the regex pattern or the file content.")
-            else:
-                # Write back updated content
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    file.write(new_mt_content)
-                print("File updated successfully.")
+            print (new_mt_content) 
+            # Write back updated content
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(new_mt_content)
+            print("File updated successfully.")
 
         except Exception as e:
             print(f"Error reading or writing the file: {e}")
     else:
         print("No valid data in column A of the Google Sheet.")
+Modify_Customer_code()

@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 import decimal
 import socket
 from datetime import datetime
-from sap_hana_connection import connect_and_process_data  # Import the new module
+from SAPHANA_CONNECTION import connect_and_process_data  # Import the new module
 
 
 def main_function():

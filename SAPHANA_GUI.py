@@ -6,10 +6,10 @@ import SAPHANA  # Giả sử bạn đã định nghĩa các chức năng trong S
 import sys
 import GET_CUSTOMER_CODE
 import GET_PRODUCT_CODE
-import ADVANCE  # Thêm import cho file ADVANCE.py
-import ConnectionGUI
-import ID
-import CopyMT
+import EDIT_ADVANCE  # Thêm import cho file ADVANCE.py
+import EDIT_CONNECTION
+import EDIT_SPREADSHEET_ID
+import COPY_CUSTOMER_CODE_GUI
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
 
@@ -140,13 +140,13 @@ def save_to_file():
 
 def open_text_input_app():
     new_window = tk.Toplevel(root)  # Tạo cửa sổ mới
-    app = ADVANCE.TextInputApp(new_window)  # Khởi động ứng dụng TextInputApp
+    app = EDIT_ADVANCE.TextInputApp(new_window)  # Khởi động ứng dụng TextInputApp
 
 def editConnection():
-    ConnectionGUI.edit_connection()
+    EDIT_CONNECTION.edit_connection()
 
 def editID():
-    ID.editID()
+    EDIT_SPREADSHEET_ID.editID()
 
 # Tạo cửa sổ chính
 root = tk.Tk()
@@ -167,6 +167,7 @@ menu_bar.add_cascade(label="Configure", menu=Configure)
 code_menu = tk.Menu(menu_bar, tearoff=0)
 code_menu.add_command(label="Customer", command=Modify_customer_code)
 code_menu.add_command(label="Product", command=Modify_Product_code)
+code_menu.add_command(label="Auto copy customer code", command=COPY_CUSTOMER_CODE_GUI.copy_customer_code_gui)
 code_menu.add_command(label="Advance", command=open_text_input_app)
 menu_bar.add_cascade(label="Modify", menu=code_menu)
 

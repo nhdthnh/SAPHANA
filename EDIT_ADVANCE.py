@@ -35,6 +35,8 @@ class TextInputApp:
                 id_sheet =  self.text_id.get("1.0",tk.END).strip()
                 item_codes = get_column_a_values(sheet_name, column_name, id_sheet)
                 print(item_codes)
+                # Remove periods from each item code
+                item_codes = [code.replace('.', '') for code in item_codes] if item_codes else []
                 item_code_values = ", ".join([f"'{value}'" for value in item_codes]) if item_codes else ""
                 if item_codes:
                     self.text3.delete("1.0", tk.END)  # Clear existing text
@@ -45,6 +47,7 @@ class TextInputApp:
             except Exception as e:
                 self.text3.delete("1.0", tk.END)  # Clear existing text
                 self.text3.insert(tk.END, f"Error: {str(e)}")  # Log error message
+
         
         def browse():
             file_path = filedialog.askopenfilename()  # Mở hộp thoại chọn tệp

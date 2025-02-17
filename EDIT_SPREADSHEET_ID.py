@@ -7,38 +7,47 @@ def editID():
     def load_default_values():
         with open("Configure/spreadsheet_id.txt", "r") as f:
             lines = f.readlines()
-            return lines
+            print(lines)
+            # return lines
 
     def show_main_window():
         # Ẩn cửa sổ nhập mật khẩu
         password_window.destroy()
-        
-        # Tạo cửa sổ chính
+        with open ("Configure/spreadsheet_id.txt", "r") as file:
+            lines = file.readlines()
+            ID1 = lines[0].strip()
+            ID2 = lines[1].strip()  
+            ID3 = lines[2].strip()
+            # Tạo cửa sổ chính
         main_window = tk.Tk()
-        main_window.title("Spreadsheet ID")
-        main_window.geometry("500x50")  # Kéo dài kích thước cửa sổ
+        main_window.title("EDIT SPREADSHEET")
+        main_window.geometry("500x80")  # Kéo dài kích thước cửa sổ
         main_window.resizable(False, False)  # Không cho phép thay đổi kích thước cửa sổ
         # Tạo các label và entry
-        tk.Label(main_window, text="Spreadsheet ID:").grid(row=0, column=0)
+        tk.Label(main_window, text="SAP-DOANHSO").grid(row=0, column=0)
         spreadsheet_entry = tk.Entry(main_window, width=50)
         spreadsheet_entry.grid(row=0, column=1)
+        spreadsheet_entry.insert(0, ID1)
 
         # Tạo các label và entry cho dòng thứ hai
-        tk.Label(main_window, text="Second ID:").grid(row=1, column=0)
+        tk.Label(main_window, text="SAP-DOANHSO-QUEENAM").grid(row=1, column=0)
         second_line_entry = tk.Entry(main_window, width=50)
         second_line_entry.grid(row=1, column=1)
+        second_line_entry.insert(0, ID2)
 
-        # Tải các giá trị mặc định từ file
-        spreadsheet, second_line = load_default_values()
-        spreadsheet_entry.insert(0, spreadsheet)
-        second_line_entry.insert(0, second_line)
+        tk.Label(main_window, text="MÃ KHÁCH HÀNG QUEENAM").grid(row=2, column=0)
+        third_line_entry = tk.Entry(main_window, width=50)
+        third_line_entry.grid(row=2, column=1)
+        third_line_entry.insert(0, ID3)
+
 
         def save_info():
             spreadsheet = spreadsheet_entry.get()
             second_line = second_line_entry.get()
+            third_line = third_line_entry.get()
             # Lưu thông tin vào file
             with open("Configure/spreadsheet_id.txt", "w") as f:
-                f.write(f"{spreadsheet.strip()}\n{second_line.strip()}")
+                f.write(f"{spreadsheet.strip()}\n{second_line.strip()}\n{third_line.strip()}")
             
             messagebox.showinfo("Success", "Information saved successfully!")
             main_window.destroy()

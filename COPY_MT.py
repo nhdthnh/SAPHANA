@@ -32,5 +32,5 @@ def Copy(sheet_name):
 
     # Dán dữ liệu bắt đầu từ ô A2 với định dạng RAW
 
-    destination_sheet.update('A2', data, value_input_option='USER_ENTERED')  # Cập nhật dữ liệu mới bắt đầu từ ô A2 với định dạng USER_ENTERED
+    destination_sheet.update('A2', data, value_input_option='RAW')  # Cập nhật dữ liệu mới bắt đầu từ ô A2 với định dạng USER_ENTERED
     print (f"Cloning sheet {sheet_name} successfully")
