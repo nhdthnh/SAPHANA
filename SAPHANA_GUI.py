@@ -225,8 +225,6 @@ sheet_label_frame = tk.Frame(root)
 sheet_label_frame.pack(pady=10)
 
 
-
-
 txt_frame = tk.Frame(root)
 txt_frame.pack(pady=10)
 frame1 = tk.Frame(txt_frame)

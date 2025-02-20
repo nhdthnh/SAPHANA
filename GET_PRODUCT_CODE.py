@@ -38,10 +38,11 @@ def Modify_Product_code():
         if item_code_values:
             pattern_itemcode = r'WHERE\s*T0\."ItemCode" IN \((.*?)\)'
             replacement_itemcode = f'WHERE T0."ItemCode" IN ({item_code_values})'
+            print(replacement_itemcode)
             mt_content = re.sub(pattern_itemcode, replacement_itemcode, mt_content, flags=re.DOTALL)
-        if item_code_values == mt_content:
-            print("No changes made. Check the regex pattern or the file content.")
-        else:
+        # if item_code_values == mt_content:
+        #     print("No changes made. Check the regex pattern or the file content.")
+        # else:
             # Write back updated content
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(mt_content)

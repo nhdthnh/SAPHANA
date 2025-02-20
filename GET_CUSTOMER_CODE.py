@@ -34,8 +34,8 @@ def Modify_Customer_code():
             print("Original content loaded successfully.")
 
             # Update the WHERE clause
-            pattern = r'WHERE\s+T2\."CardCode"\s+IN\s*\((.*?)\)'
-            replacement = f'WHERE T2."CardCode" IN ({card_code_values})'
+            pattern = r'AND\s+T2\."CardCode"\s+IN\s*\((.*?)\)'
+            replacement = f'AND T2."CardCode" IN ({card_code_values})'
             new_mt_content = re.sub(pattern, replacement, mt_content, flags=re.DOTALL)
             print (new_mt_content) 
             # Write back updated content
@@ -47,4 +47,3 @@ def Modify_Customer_code():
             print(f"Error reading or writing the file: {e}")
     else:
         print("No valid data in column A of the Google Sheet.")
-Modify_Customer_code()

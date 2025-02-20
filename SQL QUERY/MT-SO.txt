@@ -1,0 +1,76 @@
+WITH ContactRanked AS (
+    SELECT 
+        T4."CardCode", 
+        T4."Name" AS "Contact Person",
+        ROW_NUMBER() OVER (PARTITION BY T4."CardCode" ORDER BY T4."CntctCode") AS "RowNum"
+    FROM PRD.OCPR T4
+)
+SELECT DISTINCT
+    T2."CardCode" AS "Customer Code",  -- Mã khách hàng
+    T2."CardName" AS "Customer Name",  -- Tên khách hàng
+    T0."ItemCode" AS "Item Code",  -- Mã sản phẩm
+    T1."ItemName" AS "Item Name",  -- Tên sản phẩm
+    T1."SalUnitMsr" AS "Sale UoM",  -- Đơn vị bán
+    T0."Quantity" AS "Ordered Quantity",  -- Số lượng đặt hàng
+    T0."OpenQty" AS "Open Quantity",  -- Số lượng chưa giao (phải bằng 0)
+    T0."DelivrdQty" AS "Delivered Quantity",  -- Số lượng đã giao
+
+    -- Tính tổng tiền trước thuế
+    T0."LineTotal" AS "Total Amount without VAT",  -- Giá tổng trước thuế (đã discount)
+
+    -- Tính giá tổng sau thuế
+    ROUND(T0."LineTotal" * (1 + (T0."VatPrcnt" / 100)), 2) AS "Total Amount with VAT",  -- Giá tổng sau thuế
+
+    -- Tính giá discount từng bịch
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND(T0."LineTotal" / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Discounted Price per Pack",  -- Giá từng bịch không thuế
+
+    -- Tính giá từng bịch sau thuế
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND((T0."LineTotal" * (1 + (T0."VatPrcnt" / 100))) / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Price per Pack with VAT",  -- Giá từng bịch có thuế
+
+    T3."DocNum" AS "SO Number",  -- Số Sales Order
+
+    -- Chuyển đổi ngày tháng để tránh lỗi định dạng trong Excel
+    TO_VARCHAR(T3."DocDate", 'DD/MM/YYYY') AS "SO Date",  -- Ngày Sales Order
+
+    -- Lấy Contact Person liên quan đến SO
+    CR."Contact Person",
+
+    -- Nhân viên bán hàng
+    T5."SlpName" AS "Sales Employee Name",  
+
+    -- 🆕 Thêm cột Quý
+    QUARTER(T3."DocDate") AS "Quarter",  -- Xác định quý (1-4)
+
+    -- 🆕 Thêm cột Năm-Tháng để dễ sort
+    TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year-Month"  -- Hiển thị năm-tháng
+
+FROM PRD.RDR1 T0  -- 📌 Dòng chi tiết Sales Order
+LEFT JOIN PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode"  -- Thông tin sản phẩm
+LEFT JOIN PRD.ORDR T3 ON T0."DocEntry" = T3."DocEntry"  -- 📌 Sales Order chính
+LEFT JOIN PRD.OCRD T2 ON T3."CardCode" = T2."CardCode"  -- Thông tin khách hàng
+LEFT JOIN ContactRanked CR ON T2."CardCode" = CR."CardCode" AND CR."RowNum" = 1  -- Lấy Contact Person đầu tiên
+LEFT JOIN PRD.OSLP T5 ON T3."SlpCode" = T5."SlpCode"  -- Thông tin nhân viên bán hàng
+
+WHERE
+    T0."ItemCode" IN (
+        '32D90002', '32D91231', '32D91232', '32D93333', '32D93334', 
+        '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', 
+        '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', 
+        '32D93340', '32D93338', '32D93339', '32D95323', '32D96330',
+        '32D97321', '32D98327', '32D9O327', '32T83221'
+    )  -- 📌 Chỉ lấy 24 sản phẩm này
+    AND T3."DocStatus" = 'C'  -- 📌 Chỉ lấy Sales Orders đã đóng (Closed)
+    AND T0."LineStatus" = 'C'  -- 📌 Chỉ lấy các dòng sản phẩm đã đóng (Closed)
+    AND T0."OpenQty" = 0  -- 📌 Xác nhận tất cả số lượng đã giao hết
+ORDER BY
+    T2."CardCode", 
+    T3."DocNum", 
+    "Year-Month" DESC,  -- Sắp xếp theo năm-tháng
+    "Quarter" DESC,  -- Sắp xếp theo quý
+    T0."ItemCode";

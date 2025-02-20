@@ -31,25 +31,43 @@ def copy_customer_code_gui():
     # destination_spreadsheet_id_entry = tk.Entry(root, width=50)
     # destination_spreadsheet_id_entry.grid(row=1, column=1)
 
-    tk.Label(root, text="Source Sheet Name:").grid(row=2, column=0)
+    tk.Label(root, text="Source Sheet Name:").grid(row=1, column=0)
     source_sheet_name_entry = tk.Entry(root, width=50)
-    source_sheet_name_entry.grid(row=2, column=1)
+    source_sheet_name_entry.grid(row=1, column=1)
     source_sheet_name_entry.insert(0, "MÃ KHÁCH-SALE QUOTATION-SO")
 
-    tk.Label(root, text="Destination Sheet Name:").grid(row=3, column=0)
+    tk.Label(root, text="Destination Sheet Name:").grid(row=2, column=0)
     destination_sheet_name_entry = tk.Entry(root, width=50)
-    destination_sheet_name_entry.grid(row=3, column=1)
+    destination_sheet_name_entry.grid(row=2, column=1)
     destination_sheet_name_entry.insert(0, "MT-DSKH")
 
-    tk.Label(root, text="Column Code Header:").grid(row=4, column=0)
+    tk.Label(root, text="HEADER MT-DSKH", font=("Arial", 10, "bold")).grid(row=3, column=0)
+    tk.Label(root, text="HEADER MÃ KHÁCH-SALE QUOTATION-SO", font=("Arial", 10, "bold")).grid(row=3, column=1)
+
+    tk.Label(root, text="Customer Code:").grid(row=4, column=0)
     column_code_entry = tk.Entry(root, width=50)
     column_code_entry.grid(row=4, column=1)
     column_code_entry.insert(0, "MÃ KHÁCH STORE")
 
-    tk.Label(root, text="Column Name Header:").grid(row=5, column=0)
+    tk.Label(root, text="Customer Store:").grid(row=5, column=0)
     column_name_entry = tk.Entry(root, width=50)
     column_name_entry.grid(row=5, column=1)
     column_name_entry.insert(0, "CONTACT PERSON")
+
+    tk.Label(root, text="Mã Đơn:").grid(row=6, column=0)
+    column_code_sale_quotation_entry = tk.Entry(root, width=50)
+    column_code_sale_quotation_entry.grid(row=6, column=1)
+    column_code_sale_quotation_entry.insert(0, "MÃ SALE QUOTATION")
+
+    tk.Label(root, text="Miền:").grid(row=7, column=0)
+    column_note_entry = tk.Entry(root, width=50)
+    column_note_entry.grid(row=7, column=1)
+    column_note_entry.insert(0, "Note")
+
+    tk.Label(root, text="").grid(row=8, column=0)
+    column_person_entry = tk.Entry(root, width=50)
+    column_person_entry.grid(row=8, column=1)
+    column_person_entry.insert(0, "Người phụ trách")
 
 
     with open ("Configure/spreadsheet_id.txt", "r") as file:
@@ -67,13 +85,18 @@ def copy_customer_code_gui():
         destination_sheet_name = destination_sheet_name_entry.get()
         column_code = column_code_entry.get()
         column_name = column_name_entry.get()
-        COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID1, source_sheet_name, destination_sheet_name, column_code, column_name)
-        COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID2, source_sheet_name, destination_sheet_name, column_code, column_name)
+        column_code_sale_quotation = column_code_sale_quotation_entry.get()
+        column_note = column_note_entry.get()
+        column_person= column_person_entry.get()
+        COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID1, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, column_person)
+        COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID2, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, column_person)
         messagebox.showinfo("Success", "Customer code and contact person copied successfully!")
         print("Customer code and contact person copied successfully!")
 
     # Submit button
     submit_button = tk.Button(root, text="Copy Data", command=on_submit)
-    submit_button.grid(row=6, column=0, columnspan=2)
+    submit_button.grid(row=9, column=0, columnspan=2)
 
     root.mainloop()
+
+# copy_customer_code_gui()

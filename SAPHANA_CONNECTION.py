@@ -2,7 +2,7 @@ import decimal
 import socket
 from hdbcli import dbapi
 
-def connect_and_process_data(host, port, user, password, sheet_name, service, spreadsheet_id,sql_query_code):
+def connect_and_process_data(host, port, user, password, sheet_name, service, spreadsheet_id, sql_query_code):
 
     # Set default timeout for socket connections
     socket.setdefaulttimeout(10)  # 10 seconds timeout
@@ -41,6 +41,13 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
                 converted_row.append(value)
         values.append(converted_row)
     
+    # Xóa tất cả các dòng từ hàng 2 trở xuống
+    clear_range = f'{sheet_name}!A2:Z'
+    service.spreadsheets().values().clear(
+        spreadsheetId=spreadsheet_id,
+        range=clear_range
+    ).execute()
+    
     # Cập nhật vào Google Sheets
     body = {
         'values': values
@@ -52,11 +59,11 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
     service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
         range=range_name,
-        valueInputOption='RAW',
+        valueInputOption='USER_ENTERED',
         body=body
     ).execute()
     
     print(f"Successfully updated data to Google Sheets for sheet: {sheet_name}!")
     # Đóng kết nối
     cursor.close()
-    conn.close() 
+    conn.close()

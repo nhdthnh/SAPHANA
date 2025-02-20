@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looker Studio Embed</title>
+    <style>
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* Tỷ lệ 16:9 */
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Báo cáo Looker Studio</h2>
+    
+    <div class="iframe-container">
+        <iframe src="https://lookerstudio.google.com/embed/reporting/c0525989-6d8b-4aaa-aac6-a1e14d8effd4/page/dUjmE"
+                allowfullscreen
+                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+        </iframe>
+    </div>
+
+</body>
+</html>
