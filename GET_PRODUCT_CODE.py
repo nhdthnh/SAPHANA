@@ -1,4 +1,5 @@
 import re
+import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -20,32 +21,34 @@ def get_column_a_values(sheet_name):
         return None  # No data
     return [row[0] for row in values[1:] if row]  # Skip header and empty rows
 
-
 def Modify_Product_code():
     item_codes = get_column_a_values("QUEENAM-SP")
 
     item_code_values = ", ".join([f"'{value}'" for value in item_codes]) if item_codes else ""
 
-    # File path
-    file_path = 'SQL QUERY/Queenam.txt'
+    # Get all .txt files in the SQL QUERY directory
+    directory = 'SQL QUERY'
+    txt_files = [f for f in os.listdir(directory) if f.endswith('.txt')]
 
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            mt_content = file.read()
-        print("Original content loaded successfully.")
+    for txt_file in txt_files:
+        file_path = os.path.join(directory, txt_file)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                mt_content = file.read()
+            print(f"Original content loaded successfully from {file_path}.")
 
-        # Update WHERE T0."ItemCode"
-        if item_code_values:
-            pattern_itemcode = r'WHERE\s*T0\."ItemCode" IN \((.*?)\)'
-            replacement_itemcode = f'WHERE T0."ItemCode" IN ({item_code_values})'
-            print(replacement_itemcode)
-            mt_content = re.sub(pattern_itemcode, replacement_itemcode, mt_content, flags=re.DOTALL)
-        # if item_code_values == mt_content:
-        #     print("No changes made. Check the regex pattern or the file content.")
-        # else:
-            # Write back updated content
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(mt_content)
-            print("File updated successfully.")
-    except Exception as e:
-        print(f"Error reading or writing the file: {e}")
+            # Update WHERE T0."ItemCode"
+            if item_code_values:
+                pattern_itemcode = r'."ItemCode" IN \((.*?)\)'
+                replacement_itemcode = f'."ItemCode" IN ({item_code_values})'
+                
+                mt_content = re.sub(pattern_itemcode, replacement_itemcode, mt_content, flags=re.DOTALL)
+                print(replacement_itemcode)
+            
+                # Write back updated content
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(mt_content)
+                print(f"File updated successfully: {file_path}")
+
+        except Exception as e:
+            print(f"Error reading or writing the file {file_path}: {e}")

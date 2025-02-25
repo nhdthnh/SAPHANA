@@ -13,6 +13,7 @@ import COPY_CUSTOMER_CODE_GUI
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
 
+
 class RedirectText:
     def __init__(self, text_widget):
         self.text_widget = text_widget
@@ -24,8 +25,20 @@ class RedirectText:
             self.text_widget.insert(tk.END, f"[{current_time}] {string}\n")  # Thêm thời gian và xuống dòng
             self.text_widget.see(tk.END)
 
+
     def flush(self):  # Phương thức này cần thiết để tương thích với Python
         pass
+
+# Function to update the countdown label
+def update_countdown(seconds):
+    if seconds > 0:
+        mins, secs = divmod(seconds, 60)
+        countdown_label.config(text=f"Next run in: {mins:02}:{secs:02}")
+        root.after(1000, update_countdown, seconds - 1)
+    else:
+        countdown_label.config(text="Running...", fg="green")
+
+
 
 def run_task():
     try:
@@ -60,12 +73,15 @@ def schedule_task(interval):
         time.sleep(interval)  # Chờ 20 giây
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
         print("Restarting task...")
+        root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
 
 def start_scheduled_task():
-    # interval = 10
-    interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
+    interval = 5
+    # interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
+    update_countdown(interval)  # Start the countdown
     threading.Thread(target=schedule_task, args=(interval,), daemon=True).start()
     print(f"Scheduled in {int(interval/60)} mins")
+    run_button.config(state=tk.DISABLED) 
 
 def Modify_customer_code():
     GET_CUSTOMER_CODE.Modify_Customer_code()
@@ -194,7 +210,9 @@ schedule_menu.pack(side=tk.LEFT, padx=(0, 5))
 # Nút thiết lập
 schedule_button = tk.Button(top_frame, text="SCHEDULE", command=start_scheduled_task, bg='blue', fg='white')
 schedule_button.pack(side=tk.LEFT, padx=(5, 10))
- 
+
+countdown_label = tk.Label(root, text="Next run in: --:--", fg='red')
+countdown_label.pack(pady= 10)
 
 Modify_label = tk.Label(root, text="Modify sheet to run")
 Modify_label.pack(padx=0)
@@ -246,6 +264,7 @@ label2.pack(side=tk.TOP)  # Đặt label ở trên
 sheet_output1 = tk.Listbox(frame2, height=10, width=30, bd=1, highlightbackground="black", highlightcolor="black")
 sheet_output1.pack(side=tk.TOP)  # Đặt Listbox dưới label
 
+
 console_frame = tk.Frame(root)  # Tạo một frame mới để chứa label và button
 console_frame.pack(pady=10)  # Đặt frame với khoảng cách trên và dưới
 
@@ -261,8 +280,15 @@ console_output = tk.Text(root, height=10, width=50, bd=1, highlightbackground="b
 console_output.pack(pady=10, fill=tk.X, expand=True)  # Cập nhật để chiếm 100% chiều rộng
 console_output.config(wrap=tk.WORD)  # Cho phép xuống hàng theo từ
 
+status_frame = tk.Frame(root)
+status_frame.pack(pady=10)
+
+
+
 # Chuyển hướng stdout đến textbox
 sys.stdout = RedirectText(console_output)
+
+
 
 # Gọi hàm để tải dữ liệu vào Listbox khi khởi động
 load_listboxes_from_file()
@@ -272,3 +298,4 @@ root.protocol("WM_DELETE_WINDOW", on_quit)  # Gọi hàm on_quit khi cửa sổ 
 
 # Chạy GUI
 root.mainloop()
+

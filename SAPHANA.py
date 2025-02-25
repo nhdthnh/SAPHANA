@@ -6,9 +6,12 @@ import socket
 from datetime import datetime
 from SAPHANA_CONNECTION import connect_and_process_data  # Import the new module
 
+# Khai báo biến toàn cục
 
 def main_function():
     print("🔄 Running task...")  # In ra console để kiểm tra
+    # Biến đếm số lần chạy và số lần chạy thành công
+
     # Đọc thông tin kết nối từ file
     with open('Configure/connection_info.txt', 'r') as file:
         for line in file:
@@ -26,8 +29,8 @@ def main_function():
     with open('Configure/spreadsheet_id.txt', 'r') as file:
         lines = file.readlines()
         spreadsheet_id = lines[0].strip()  # Hàng 1 cho ID1
-        spreadsheet_id1= lines[1].strip()
-    
+        spreadsheet_id1 = lines[1].strip()
+
     # Khởi tạo Google Sheets service
     creds = service_account.Credentials.from_service_account_file('Configure/credentials.json')
     service = build('sheets', 'v4', credentials=creds)
@@ -65,12 +68,14 @@ def main_function():
         except Exception as e:
             print(f"Can not log: {str(e)}")
 
+    all_successful = True  # Biến cờ để kiểm tra xem tất cả các sheet có được xử lý thành công hay không
+
     # Đọc tên sheet từ file
     with open('Configure/sheet_name.txt', 'r') as file:
         sheet_names = []  # Khởi tạo danh sách rỗng
         for line in file:  # Sử dụng vòng lặp for để đọc từng dòng
             sheet_name = line.strip()  # Lấy tên sheet từ dòng hiện tại
-            print(f"Progessing sheet: {sheet_name}")
+            print(f"Processing sheet: {sheet_name}")
             # Kết nối đến SAP HANA
             try:
                 query_file = f"SQL QUERY/{sheet_name}.txt"  # Tạo tên file query tương ứng với sheet_name và thêm đường dẫn folder
@@ -82,10 +87,11 @@ def main_function():
                 # Ghi log lỗi vào sheet LOG
                 log_error(service, spreadsheet_id, error_message)
                 break
+
     with open('Configure/second_sheet_name.txt', 'r') as file:
         for line in file:  # Sử dụng vòng lặp for để đọc từng dòng
             sheet_name1 = line.strip()  # Lấy tên sheet từ dòng hiện tại
-            print(f"Progessing sheet: {sheet_name1}")
+            print(f"Processing sheet: {sheet_name1}")
             # Kết nối đến SAP HANA
             try:
                 query_file = f"SQL QUERY/{sheet_name1}.txt"  # Tạo tên file query tương ứng với sheet_name và thêm đường dẫn folder
@@ -96,4 +102,4 @@ def main_function():
                 print(error_message)
                 log_error(service, spreadsheet_id1, error_message)
                 break
-    
+main_function()

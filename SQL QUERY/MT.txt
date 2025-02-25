@@ -44,13 +44,21 @@ SELECT DISTINCT
     -- 🆕 Thêm cột Năm-Tháng để dễ sort
     TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year-Month",  -- Hiển thị năm-tháng
 
-    -- 📌 **Cột mới hiển thị trạng thái hóa đơn**
+    -- 📌 **Cột hiển thị trạng thái hóa đơn rõ ràng**
     CASE 
         WHEN T3."DocStatus" = 'O' THEN 'Chưa thu tiền'  
-        WHEN T3."DocStatus" = 'C' THEN 'Đã thu tiền'
-        WHEN T3."DocStatus" = 'D' THEN 'Đã hủy'
+        WHEN T3."DocStatus" = 'C' AND T3."CANCELED" = 'N' THEN 
+            CASE 
+                WHEN T3."PaidToDate" >= T3."DocTotal" THEN 'Đã thu tiền' 
+                ELSE 'Chưa thu hết'
+            END
+        WHEN T3."DocStatus" = 'C' AND T3."CANCELED" = 'Y' THEN 'Đã hủy'
         ELSE 'Không xác định'
-    END AS "Invoice Status"  -- Ghi chú trạng thái hóa đơn
+    END AS "Invoice Payment Status",  -- Trạng thái thanh toán hóa đơn
+
+    -- 📌 **2 Cột mới nằm ở cuối bảng**
+    T3."DocStatus" AS "Invoice Status",  -- Trạng thái hóa đơn (O = Mở, C = Đóng)
+    T3."CANCELED" AS "Is Canceled"  -- Hóa đơn có bị hủy hay không (Y = Có, N = Không)
 
 FROM PRD.INV1 T0  -- 📌 Dòng chi tiết hóa đơn
 LEFT JOIN PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode"  -- Thông tin sản phẩm
@@ -63,10 +71,10 @@ WHERE
     -- 📌 Chỉ lấy đúng 48 sản phẩm (24 cũ + 24 mới)
     T0."ItemCode" IN (
         '32D90002', '32D91231', '32D91232', '32D93333', '32D93334', 
-        '32D93335', '32D95322', '32D96329', '32D97320', '32D98326',
-        '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', 
+        '32D93335', '32D95322', '32D96329', '32D97320', '32D98326','32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', 
         '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', 
         '32D97321', '32D98327', '32D9O327', '32T83221',  -- ✅ 24 sản phẩm cũ
+
         '32D90000', '32D91223', '32D91224', '32D93327', '32D93328', 
         '32D93329', '32D95319', '32D96327', '32D97318', '32D98323', 
         '32D9O324', '32D9O326', '32T83217', '32T83219', '32T83221', 

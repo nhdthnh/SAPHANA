@@ -13,7 +13,7 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
         user=user,
         password=password
     )
-    print(f"SAP HANA CONNECTED FOR SHEET NAME: {sheet_name}!")
+    print(f"SAP HANA CONNECTED: {sheet_name}!")
     
     # Reset timeout to default
     socket.setdefaulttimeout(None)
@@ -28,7 +28,11 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
     # Thực hiện truy vấn
     cursor.execute(sql_query)
     results = cursor.fetchall()
-    
+
+    # Lấy số lượng cột từ kết quả truy vấn
+    num_columns = len(cursor.description)
+    # print(f"Number of columns in the result: {num_columns}")
+
     # Chuẩn bị dữ liệu để đưa vào Google Sheets
     values = []
     for row in results:
@@ -41,8 +45,9 @@ def connect_and_process_data(host, port, user, password, sheet_name, service, sp
                 converted_row.append(value)
         values.append(converted_row)
     
-    # Xóa tất cả các dòng từ hàng 2 trở xuống
-    clear_range = f'{sheet_name}!A2:Z'
+    # Xóa tất cả các dòng từ hàng 2 trở xuống theo số lượng cột
+    column_letter = chr(64 + num_columns)  # Convert column number to letter (e.g., 1 -> A, 2 -> B, ..., 26 -> Z)
+    clear_range = f'{sheet_name}!A2:{column_letter}'
     service.spreadsheets().values().clear(
         spreadsheetId=spreadsheet_id,
         range=clear_range

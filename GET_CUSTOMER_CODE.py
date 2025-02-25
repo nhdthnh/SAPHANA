@@ -1,4 +1,5 @@
 import re
+import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -19,6 +20,7 @@ def get_column_a_values(sheet_name):
     if not values or len(values) < 2:
         return None  # No data in column A
     return [row[0] for row in values[1:] if row]  # Skip header and empty rows
+
 def Modify_Customer_code():
     # Retrieve customer codes from Google Sheets
     sheet_name = "MT-DSKH"
@@ -26,24 +28,30 @@ def Modify_Customer_code():
     if customer_codes:
         card_code_values = ", ".join([f"'{value}'" for value in customer_codes])
         card_code_values = card_code_values.replace(".", "")
-        # Read MT.txt content
-        file_path = 'SQL QUERY/MT.txt'
-        try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                mt_content = file.read()
-            print("Original content loaded successfully.")
+        
+        # Get all .txt files in the SQL QUERY directory
+        directory = 'SQL QUERY'
+        txt_files = [f for f in os.listdir(directory) if f.endswith('.txt')]
+        
+        for txt_file in txt_files:
+            file_path = os.path.join(directory, txt_file)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    mt_content = file.read()
+                print(f"Original content loaded successfully from {file_path}.")
 
-            # Update the WHERE clause
-            pattern = r'AND\s+T2\."CardCode"\s+IN\s*\((.*?)\)'
-            replacement = f'AND T2."CardCode" IN ({card_code_values})'
-            new_mt_content = re.sub(pattern, replacement, mt_content, flags=re.DOTALL)
-            print (new_mt_content) 
-            # Write back updated content
-            with open(file_path, 'w', encoding='utf-8') as file:
-                file.write(new_mt_content)
-            print("File updated successfully.")
+                # Update the WHERE clause
+                pattern = r'"CardCode"\s+IN\s*\((.*?)\)'
+                replacement = f'"CardCode" IN ({card_code_values})'
+                new_mt_content = re.sub(pattern, replacement, mt_content, flags=re.DOTALL)
+                print(new_mt_content)
+                
+                # Write back updated content
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(new_mt_content)
+                print(f"File updated successfully: {file_path}")
 
-        except Exception as e:
-            print(f"Error reading or writing the file: {e}")
+            except Exception as e:
+                print(f"Error reading or writing the file {file_path}: {e}")
     else:
         print("No valid data in column A of the Google Sheet.")

@@ -6,45 +6,54 @@ SELECT
     T3."WhsName" AS "Warehouse Name",  
 
     -- 🔥 Định dạng số chuẩn, giữ nguyên số thập phân
-    CAST(T2."OnHand" AS VARCHAR) AS "Quantity (KG)",
-    CAST(T2."IsCommited" AS VARCHAR) AS "Committed Quantity (KG)",
-    CAST(T2."OnOrder" AS VARCHAR) AS "Ordered Quantity (KG)",
+    REPLACE(CAST(T2."OnHand" AS VARCHAR), '.', ',') AS "Quantity (KG)",
+    REPLACE(CAST(T2."IsCommited" AS VARCHAR), '.', ',') AS "Committed Quantity (KG)",
+    REPLACE(CAST(T2."OnOrder" AS VARCHAR), '.', ',') AS "Ordered Quantity (KG)",
 
     -- 🔥 Fix Available Quantity: Tồn kho - Cam kết + Đặt hàng (Không làm tròn)
-    CAST((T2."OnHand" - T2."IsCommited" + T2."OnOrder") AS VARCHAR) AS "Available Quantity (KG)",
+    REPLACE(CAST((T2."OnHand" - T2."IsCommited" + T2."OnOrder") AS VARCHAR), '.', ',') AS "Available Quantity (KG)",
 
     -- 🌟 Chia số lượng KG thành số bịch (Giữ nguyên số thập phân)
-    CAST(
-        CASE
-            WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."OnHand" / 0.075
-            WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."OnHand" / 0.15
-            ELSE NULL
-        END AS VARCHAR
+    REPLACE(
+        CAST(
+            CASE
+                WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."OnHand" / 0.075
+                WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."OnHand" / 0.15
+                ELSE NULL
+            END AS VARCHAR
+            
+        ), '.', ','
     ) AS "Quantity (Packs)",  
 
-    CAST(
-        CASE
-            WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."IsCommited" / 0.075
-            WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."IsCommited" / 0.15
-            ELSE NULL
-        END AS VARCHAR
+    REPLACE(
+        CAST(
+            CASE
+                WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."IsCommited" / 0.075
+                WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."IsCommited" / 0.15
+                ELSE NULL
+            END AS VARCHAR
+        ), '.', ','
     ) AS "Committed Quantity (Packs)",  
 
-    CAST(
-        CASE
-            WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."OnOrder" / 0.075
-            WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."OnOrder" / 0.15
-            ELSE NULL
-        END AS VARCHAR
+    REPLACE(
+        CAST(
+            CASE
+                WHEN T1."SalUnitMsr" LIKE '%75g%' THEN T2."OnOrder" / 0.075
+                WHEN T1."SalUnitMsr" LIKE '%150g%' THEN T2."OnOrder" / 0.15
+                ELSE NULL
+            END AS VARCHAR
+        ), '.', ','
     ) AS "Ordered Quantity (Packs)",  
 
     -- 🔥 Fix Available Pack: (Tồn kho - Cam kết + Đặt hàng) / số gram (Không làm tròn)
-    CAST(
-        CASE
-            WHEN T1."SalUnitMsr" LIKE '%75g%' THEN (T2."OnHand" - T2."IsCommited" + T2."OnOrder") / 0.075
-            WHEN T1."SalUnitMsr" LIKE '%150g%' THEN (T2."OnHand" - T2."IsCommited" + T2."OnOrder") / 0.15
-            ELSE NULL
-        END AS VARCHAR
+    REPLACE(
+        CAST(
+            CASE
+                WHEN T1."SalUnitMsr" LIKE '%75g%' THEN (T2."OnHand" - T2."IsCommited" + T2."OnOrder") / 0.075
+                WHEN T1."SalUnitMsr" LIKE '%150g%' THEN (T2."OnHand" - T2."IsCommited" + T2."OnOrder") / 0.15
+                ELSE NULL
+            END AS VARCHAR
+        ), '.', ','
     ) AS "Available Quantity (Packs)"
 
 FROM PRD.OITW T2
@@ -52,13 +61,7 @@ INNER JOIN PRD.OWHS T3 ON T2."WhsCode" = T3."WhsCode"
 INNER JOIN PRD.OITM T1 ON T2."ItemCode" = T1."ItemCode"
 
 WHERE 
-    T2."ItemCode" IN (
-        '32D90002', '32D91231', '32D91232', '32D93333', '32D93334', 
-        '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', 
-        '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', 
-        '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', 
-        '32D97321', '32D98327', '32D9O327', '32T83221'
-    )  
+    T2."ItemCode" IN ('32D90002', '32D91231', '32D91232', '32D93333', '32D93334', '32D93335', '32D95322', '32D96329', '32D97320', '32D98326', '32D9O326', '32T83220', '32D90003', '32D91234', '32D91233', '32D93340', '32D93338', '32D93339', '32D95323', '32D96330', '32D97321', '32D98327', '32D9O327', '32T83221')  
     -- 🔥 Chỉ lấy 3 kho cần thiết
     AND T2."WhsCode" IN ('FTP1', 'FTP5', 'FTP3')
 
