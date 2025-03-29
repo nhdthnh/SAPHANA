@@ -68,8 +68,6 @@ def main_function():
         except Exception as e:
             print(f"Can not log: {str(e)}")
 
-    all_successful = True  # Biến cờ để kiểm tra xem tất cả các sheet có được xử lý thành công hay không
-
     # Đọc tên sheet từ file
     with open('Configure/sheet_name.txt', 'r') as file:
         sheet_names = []  # Khởi tạo danh sách rỗng
@@ -102,4 +100,5 @@ def main_function():
                 print(error_message)
                 log_error(service, spreadsheet_id1, error_message)
                 break
+
 main_function()

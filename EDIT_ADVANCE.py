@@ -81,7 +81,7 @@ class TextInputApp:
         self.text_id.pack(side=tk.LEFT)  # Đặt text1 bên trái
         with open('Configure/spreadsheet_id.txt', 'r') as file:
             lines = file.readlines()
-            spreadsheet_id = lines[0].strip()  # Hàng 1 cho ID1
+            spreadsheet_id = lines[1].strip()  # Hàng 1 cho ID1
         self.text_id.insert(tk.END, spreadsheet_id)  # Chèn nội dung vào text4
         self.label1 = tk.Label(sheet, text="Sheet name: ")
         self.label1.pack(side=tk.LEFT)

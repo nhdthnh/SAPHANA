@@ -76,8 +76,8 @@ def schedule_task(interval):
         root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
 
 def start_scheduled_task():
-    interval = 5
-    # interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
+    # interval = 5
+    interval = int(schedule_var.get()) * 60  # Chuyển đổi phút thành giây
     update_countdown(interval)  # Start the countdown
     threading.Thread(target=schedule_task, args=(interval,), daemon=True).start()
     print(f"Scheduled in {int(interval/60)} mins")
@@ -177,8 +177,6 @@ Configure = tk.Menu(menu_bar, tearoff=0)
 Configure.add_command(label="Connection", command=editConnection)
 Configure.add_command(label="Spreadsheet ID", command=editID)
 menu_bar.add_cascade(label="Configure", menu=Configure)
-
-
 
 code_menu = tk.Menu(menu_bar, tearoff=0)
 code_menu.add_command(label="Customer", command=Modify_customer_code)
