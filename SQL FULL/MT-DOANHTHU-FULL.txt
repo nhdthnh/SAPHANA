@@ -1,0 +1,30 @@
+SELECT 
+    OINV."DocNum" AS "Invoice Number",  -- Số hóa đơn
+    TO_VARCHAR(OINV."DocDate", 'DD/MM/YYYY') AS "Invoice Date",  -- Ngày hóa đơn
+    OINV."CardCode" AS "Customer Code",  -- Mã khách hàng
+    OCRD."CardName" AS "Customer Name",  -- Tên khách hàng
+    OINV."DocTotal" AS "Total Invoice Amount",  -- Tổng tiền hóa đơn (đã có VAT)
+    OINV."PaidToDate" AS "Amount Paid",  -- Số tiền đã thanh toán
+    (OINV."DocTotal" - OINV."PaidToDate") AS "Unpaid Amount",  -- Số tiền chưa thanh toán
+
+    -- Trạng thái thanh toán
+    CASE 
+        WHEN OINV."CANCELED" IN ('Y', 'C') THEN 'Canceled'  -- Nếu hóa đơn bị hủy
+        WHEN OINV."PaidToDate" >= OINV."DocTotal" THEN 'Paid'  -- Nếu đã thu đủ tiền
+        ELSE 'Unpaid'  -- Nếu chưa thu hết tiền
+    END AS "Payment Status",
+
+    -- Trạng thái hóa đơn
+    OINV."DocStatus" AS "Invoice Status",
+    OINV."CANCELED" AS "Is Canceled",
+
+    -- Thêm cột Quý và Năm-Tháng
+    QUARTER(OINV."DocDate") AS "Quarter",  -- Xác định quý (1-4)
+    TO_VARCHAR(OINV."DocDate", 'YYYY-MM') AS "Year-Month"  -- Hiển thị năm-tháng
+
+FROM PRD.OINV OINV  -- Bảng hóa đơn A/R
+LEFT JOIN PRD.OCRD OCRD ON OINV."CardCode" = OCRD."CardCode"  -- Thông tin khách hàng
+
+ORDER BY 
+    OINV."DocDate" DESC, 
+    OINV."DocNum";

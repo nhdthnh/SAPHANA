@@ -49,21 +49,24 @@ def copy_customer_code(source_spreadsheet_id, destination_spreadsheet_id, source
     responsible_person_index = header_row.index(responsible_person)
     responsible_person_values = [[row[responsible_person_index] if len(row) > responsible_person_index else ""] for row in data[2:]]
     write_values(destination_spreadsheet_id, destination_sheet_name, responsible_person_values, 'E')
+    print("Done")
     
 
 
 
-# # Example usage
-# source_spreadsheet_id = "1zxotffwggzpITJiYMJAHGJS-YzpdUAI08Wn4gMh5Opc"
-# destination_spreadsheet_id = "17rIeCbiYwiIncRar-i_ZiU7Czg9jGyz5YzobwP-ZMbo"
-# source_sheet_name = 'MÃ KHÁCH-SALE QUOTATION-SO'
-# destination_sheet_name = 'MT-DSKH'
-# column_code = "MÃ KHÁCH STORE"
-# column_name = "CONTACT PERSON"
-# column_code_sale_quotation = "MÃ SALE QUOTATION"
-# column_note = "Note"
-# responsible_person = "Người phụ trách"
+# Example usage
+source_spreadsheet_id = "1zxotffwggzpITJiYMJAHGJS-YzpdUAI08Wn4gMh5Opc"
+destination_spreadsheet_id = "17rIeCbiYwiIncRar-i_ZiU7Czg9jGyz5YzobwP-ZMbo"
+source_sheet_name = 'MÃ KHÁCH-SALE QUOTATION-SO'
+destination_sheet_name = 'MT-DSKH'
+column_code = "MÃ KHÁCH STORE"
+column_name = "CONTACT PERSON"
+column_code_sale_quotation = "MÃ SALE QUOTATION"
+column_note = "Note"
+responsible_person = "Người phụ trách"
 
-# copy_customer_code(source_spreadsheet_id, destination_spreadsheet_id, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, responsible_person)
+
+def main_copy_code():
+    copy_customer_code(source_spreadsheet_id, destination_spreadsheet_id, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, responsible_person)
 
 # # copy_customer_code(source_spreadsheet_id, destination_spreadsheet_id, source_sheet_name, destination_sheet_name, column_code, column_name)

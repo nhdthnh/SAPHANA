@@ -1,10 +1,10 @@
 from hdbcli import dbapi
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import decimal
-import socket
 from datetime import datetime
 from SAPHANA_CONNECTION import connect_and_process_data  # Import the new module
+import GET_CUSTOMER_CODE
+import COPY_CUSTOMER_CODE
 
 # Khai báo biến toàn cục
 
@@ -100,5 +100,7 @@ def main_function():
                 print(error_message)
                 log_error(service, spreadsheet_id1, error_message)
                 break
-
+            
+COPY_CUSTOMER_CODE.main_copy_code()
+GET_CUSTOMER_CODE.Modify_Customer_code()
 main_function()

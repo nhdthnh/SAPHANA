@@ -1,6 +1,7 @@
 import re
-from google.oauth2 import service_account
+
 from googleapiclient.discovery import build
+from google.oauth2 import service_account
 import tkinter as tk
 from tkinter import messagebox
 import COPY_CUSTOMER_CODE
@@ -90,13 +91,15 @@ def copy_customer_code_gui():
         column_person= column_person_entry.get()
         COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID1, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, column_person)
         COPY_CUSTOMER_CODE.copy_customer_code(source_spreadsheet_id, ID2, source_sheet_name, destination_sheet_name, column_code, column_name, column_code_sale_quotation, column_note, column_person)
-        messagebox.showinfo("Success", "Customer code and contact person copied successfully!")
+        # messagebox.showinfo("Success", "Customer code and contact person copied successfully!")
+        # root.quit()
         print("Customer code and contact person copied successfully!")
 
+        # Test access to the destination spreadsheet
     # Submit button
     submit_button = tk.Button(root, text="Copy Data", command=on_submit)
     submit_button.grid(row=9, column=0, columnspan=2)
 
-    root.mainloop()
-
+#     root.mainloop()
+#     on_submit()
 # copy_customer_code_gui()

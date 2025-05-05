@@ -9,7 +9,7 @@ import GET_PRODUCT_CODE
 import EDIT_ADVANCE  # Thêm import cho file ADVANCE.py
 import EDIT_CONNECTION
 import EDIT_SPREADSHEET_ID
-import COPY_CUSTOMER_CODE_GUI
+import COPY_CUSTOMER_CODE
 # Thêm biến toàn cục để kiểm soát việc lặp lại
 running = True
 
@@ -42,7 +42,8 @@ def update_countdown(seconds):
 
 def run_task():
     try:
-        # Gọi hàm từ SAPHANA.py để thực hiện công việc
+        COPY_CUSTOMER_CODE.main_copy_code()
+        GET_CUSTOMER_CODE.Modify_Customer_code()
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
         root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
     except Exception as e:
@@ -51,6 +52,8 @@ def run_task():
 def run_task_maunal():
     run_button.config(bg='green')  # Change button color to green when task starts
     try:
+        COPY_CUSTOMER_CODE.main_copy_code()
+        GET_CUSTOMER_CODE.Modify_Customer_code()
         SAPHANA.main_function()
         # Thêm thông báo hoàn tất
         messagebox.showinfo("Notification", "Done!!! 😺")
@@ -71,6 +74,8 @@ def schedule_task(interval):
     global running  # Sử dụng biến toàn cục
     while running:  # Kiểm tra biến running
         time.sleep(interval)  # Chờ 20 giây
+        COPY_CUSTOMER_CODE.main_copy_code()
+        GET_CUSTOMER_CODE.Modify_Customer_code()
         SAPHANA.main_function()  # Thay thế bằng hàm chính của bạn
         print("Restarting task...")
         root.after(0, lambda: [start_scheduled_task()])  # Gọi lại hàm để lặp lại
@@ -181,7 +186,7 @@ menu_bar.add_cascade(label="Configure", menu=Configure)
 code_menu = tk.Menu(menu_bar, tearoff=0)
 code_menu.add_command(label="Customer", command=Modify_customer_code)
 code_menu.add_command(label="Product", command=Modify_Product_code)
-code_menu.add_command(label="Auto copy customer code", command=COPY_CUSTOMER_CODE_GUI.copy_customer_code_gui)
+# code_menu.add_command(label="Auto copy customer code", command=)
 code_menu.add_command(label="Advance", command=open_text_input_app)
 menu_bar.add_cascade(label="Modify", menu=code_menu)
 

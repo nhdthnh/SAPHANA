@@ -1,0 +1,41 @@
+WITH MonthlySales AS (
+    SELECT 
+        T2."CardCode" AS "Customer_Code",
+        T2."CardName" AS "Customer_Name",
+        T0."ItemCode" AS "Item_Code",
+        T1."ItemName",
+        TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year_Month",
+        SUM(T0."Quantity") AS "TotalSold",
+        SUM(T0."LineTotal") AS "TotalAmount",
+
+        -- 📌 Tổng doanh số của khách hàng theo từng tháng
+        SUM(SUM(T0."LineTotal")) OVER (
+            PARTITION BY T2."CardCode", TO_VARCHAR(T3."DocDate", 'YYYY-MM')
+        ) AS "Total_Customer_Amount",
+
+        -- 📌 Phần trăm doanh số sản phẩm trong tháng
+        COALESCE(
+            ROUND(
+                100 * SUM(T0."LineTotal") / 
+                NULLIF(SUM(SUM(T0."LineTotal")) OVER (
+                    PARTITION BY T2."CardCode", TO_VARCHAR(T3."DocDate", 'YYYY-MM')
+                ), 0),
+                2
+            ),
+            0
+        ) AS "Sales_Percentage"
+
+    FROM PRD.RDR1 T0  -- Sales Order Detail
+    LEFT JOIN PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode"
+    LEFT JOIN PRD.ORDR T3 ON T0."DocEntry" = T3."DocEntry"  -- Sales Order Header
+    LEFT JOIN PRD.OCRD T2 ON T3."CardCode" = T2."CardCode"
+
+    WHERE 
+        T3."DocStatus" = 'C'  -- Chỉ lấy đơn hàng đã hoàn thành
+
+    GROUP BY 
+        T2."CardCode", T2."CardName", T0."ItemCode", T1."ItemName", 
+        TO_VARCHAR(T3."DocDate", 'YYYY-MM')
+)
+
+SELECT * FROM MonthlySales;

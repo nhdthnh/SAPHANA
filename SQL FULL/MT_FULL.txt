@@ -1,0 +1,62 @@
+WITH ContactRanked AS (
+    SELECT 
+        T4."CardCode", 
+        T4."Name" AS "Contact Person",
+        ROW_NUMBER() OVER (PARTITION BY T4."CardCode" ORDER BY T4."CntctCode") AS "RowNum"
+    FROM PRD.OCPR T4
+)
+SELECT DISTINCT
+    T2."CardCode" AS "Customer Code", 
+    T2."CardName" AS "Customer Name", 
+    T0."ItemCode" AS "Item Code", 
+    T1."ItemName" AS "Item Name", 
+    T1."SalUnitMsr" AS "Sale UoM", 
+    T0."Quantity" AS "Quantity Sold", 
+    T0."LineTotal" AS "Total Amount without VAT", 
+
+    ROUND(T0."LineTotal" * (1 + (T0."VatPrcnt" / 100)), 2) AS "Total Amount with VAT", 
+
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND(T0."LineTotal" / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Discounted Price per Pack", 
+
+    CASE
+        WHEN T0."Quantity" > 0 THEN ROUND((T0."LineTotal" * (1 + (T0."VatPrcnt" / 100))) / T0."Quantity", 2)
+        ELSE NULL
+    END AS "Price per Pack with VAT", 
+
+    T3."DocNum" AS "Invoice Number", 
+    TO_VARCHAR(T3."DocDate", 'DD/MM/YYYY') AS "Invoice Date", 
+    CR."Contact Person", 
+    T5."SlpName" AS "Sales Employee Name", 
+    QUARTER(T3."DocDate") AS "Quarter", 
+    TO_VARCHAR(T3."DocDate", 'YYYY-MM') AS "Year-Month", 
+
+    CASE 
+        WHEN T3."DocStatus" = 'O' THEN 'Chưa thu tiền'  
+        WHEN T3."DocStatus" = 'C' AND T3."CANCELED" = 'N' THEN 
+            CASE 
+                WHEN T3."PaidToDate" >= T3."DocTotal" THEN 'Đã thu tiền' 
+                ELSE 'Chưa thu hết'
+            END
+        WHEN T3."DocStatus" = 'C' AND T3."CANCELED" = 'Y' THEN 'Đã hủy'
+        ELSE 'Không xác định'
+    END AS "Invoice Payment Status", 
+
+    T3."DocStatus" AS "Invoice Status",  
+    T3."CANCELED" AS "Is Canceled"  
+
+FROM PRD.INV1 T0  
+LEFT JOIN PRD.OITM T1 ON T0."ItemCode" = T1."ItemCode"  
+LEFT JOIN PRD.OINV T3 ON T0."DocEntry" = T3."DocEntry"  
+LEFT JOIN PRD.OCRD T2 ON T3."CardCode" = T2."CardCode"  
+LEFT JOIN ContactRanked CR ON T2."CardCode" = CR."CardCode" AND CR."RowNum" = 1  
+LEFT JOIN PRD.OSLP T5 ON T3."SlpCode" = T5."SlpCode"  
+
+ORDER BY 
+    T2."CardCode", 
+    T3."DocNum", 
+    "Year-Month" DESC,  
+    "Quarter" DESC,  
+    T0."ItemCode";
